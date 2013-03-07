@@ -1,0 +1,70 @@
+<style type="text/css">
+    .report-search{
+        width:265px;
+        float:left;
+        padding-left:10px;
+    }
+    #content-search{
+        border: 1px solid #fae;
+        padding-bottom:20px;
+    }
+    .report-search label{
+        /*        font-size:15px;*/
+        font-weight:bold;
+    }
+    #filter_content_id,
+    #filter_word_length,
+    #filter_element,
+    #filter_tag_name,
+    #filter_entered_by,
+    #filter_entered_date,
+    #filter_no_files,
+    #perPage,
+    #filter_no_of_images,
+    #filter_tag_name,
+    #idf,
+    #filter_tab_name,
+    #filter_sn{
+        border:1px solid #CCCCCC;
+    }
+    #filter_no_of_images,#filter_word_length,#filter_sn{
+        width:60px;
+    }
+    
+</style>
+<div id="content-search" style="display:none;">
+    <form action="" method="post">
+        <h2>Search Content</h2>
+        <div class="report-search">
+            <label>Title</label><br />
+            <input type="text" name="heading" class="form-text" size="30">
+        </div>
+        <div class="report-search">
+            <label>Element</label><br />
+            <select name="element_id" class="form-select" style="width: 230px !important;">
+                <option value="">-------- Select Element Type --------</option>
+                <?php foreach ($this->elements as $key => $val): ?>
+                    <option value="<?php echo $key; ?>"> <?php echo $val; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="report-search">
+            <label>Tag Name</label><br />
+            <input type="text" name="tag_name" class="form-text" size="30">
+        </div>
+        <div class="report-search">
+            <label>Tag Type</label><br />
+            <input type="checkbox" name="heading_type" value="H"class="form-radio" />Heading &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="checkbox" name="tag_type" value="T"class="form-radio" />Tag
+        </div>
+        <div class="clear"></div>
+        <div class="report-search">
+            <label>&nbsp;</label><br />
+            <input type="submit" name="search" value="Search" id="report-search" class="form-submit" />
+        </div>
+        <div class="clear"></div>
+    </form>
+</div>
+<div id="report-search-result">
+    <?php echo $this->grid; ?>
+</div>

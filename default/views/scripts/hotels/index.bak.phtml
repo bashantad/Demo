@@ -1,0 +1,228 @@
+<style>
+    .booknow{
+        float:right;
+    }
+</style>
+<!--******************************************* ACTIVITIES STARTS *******************************-->
+<?php $session = Zend_Registry::get('defaultsession'); ?>
+<?php
+$data = array();
+if (count($this->element) > 0) {
+    foreach ($this->element as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    ?>
+    <div id="leftmaincol">
+        <div class="hotels">
+            <?php
+            if (count($data) > 0) {
+                foreach ($data as $keys => $item1) {
+                    $keySplit = explode("::::", $keys);
+                    $key1 = $keySplit[0];
+                    $elementCategoryId = $keySplit[1];
+                    ?>
+                    <h2><?php echo ucwords($key1); ?></h2>  
+                    <div class="carousel-see-all">
+                        <?php
+                        $params = sprintf("%s", $elementCategoryId);
+                        $rijndael = new NepalAdvisor_Rijndael_Encrypt();
+                        $cipherQuery = $rijndael->encrypt($params);
+                        printf("<a href=\"%s/hotels/%s/view-all/%s\">View All</a>", $this->siteUrl(), urlencode(strtolower($key1)), $cipherQuery);
+                        ?>
+                    </div>
+                    <div id="activities-scrollwrapper-<?php print strtolower($key1) ?>" class="activities-scrollwrapper"> 
+                        <ul id="mycarousel-<?php print strtolower($key1) ?>" class="jcarousel-skin-tango jcarousel-hotels">
+                            <?php
+                            foreach ($item1 as $key => $item) {
+                                $selected = "";
+                                $session->userlikecontent[$this->id] = is_array($session->userlikecontent[$this->id]) ? $session->userlikecontent[$this->id] : (array) $session->userlikecontent[$this->id];
+                                if ($session->userlikecontent[$this->id]) {
+                                    if (array_key_exists($key, $session->userlikecontent[$this->id])) {
+                                        $selected = "content-liked";
+                                    }
+                                }
+                                $thumb = 'uploads' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . ($item['file_name']);
+                                switch (trim($thumb)) {
+                                    case '':
+                                    case NULL:
+                                    case (!is_file($this->basePath() . DS . $thumb)) :
+                                        $thumb = sprintf("%s/images/no-image/120x120.jpg", $this->baseUrl());
+                                        break;
+                                    default:
+                                        $thumb = $this->baseUrl() . '/uploads/thumbnails/120x120/images/' . rawurlencode($item['file_name']);
+                                }
+                                ?>
+
+                                <li id="jcarousel-content-item-<?php print $key ?>" class="activities-item <?php echo $selected; ?> <?php
+                if ($key1 == "destinations") {
+                    echo destinations;
+                }
+                ?>">
+                                    <div class="slide">
+                                        <?php
+                                        /**
+                                         * append heading words with -
+                                         */
+                                        $headingParts = explode(' ', trim(strtolower($item['heading'])));
+                                        $parts = array();
+                                        // the looping is done to prevent multiple - to occur is more than one space
+                                        // is in between two words
+                                        foreach ($headingParts as $part) {
+                                            if ($part) {
+                                                $parts[] = $part;
+                                            }
+                                        }
+                                        $title = implode('-', $parts);
+
+                                        $id = $key;
+                                        $catId = $item['element_category_id'];
+                                        $chid = isset($item['chid']) ? $item['chid'] : '';
+                                        $cipher = $this->rijndael->encrypt($id . '-' . $catId . '-' . $chid);
+                                        if ($catId != "destinations") {
+                                            $detailUrl = sprintf("%s/hotels/%s/%s.html", $this->siteUrl(), $title, $cipher);
+                                        } else {
+                                            $detailUrl = sprintf("%s/places/%s/%s.html", $this->siteUrl(), $title, $cipher);
+                                        }
+                                        $likeUrl = sprintf("%s/hotels/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                                        $likeBtn = 'themes/default/themeimages/ic-like.png';
+                                        $likeAltText = 'Like';
+                                        $likeClass = 'ln-like';
+                                        $likeImageClass = 'ln-img-like';
+                                        if ($session->userlikecontent[$this->id]) {
+                                            if (array_key_exists($key, $session->userlikecontent[$this->id])) {
+                                                $likeUrl = sprintf("%s/hotels/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                                                $likeClass = 'ln-unlike';
+                                                $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                                                $likeAltText = 'Unlike';
+                                                $likeImageClass = 'ln-img-unlike';
+                                            }
+                                        }
+                                        /* if ($session->selection[$this->id]) {
+                                          if (array_key_exists($elementCategoryId, $session->selection[$this->id])) {
+                                          if (is_int(array_search($key, explode(',', $session->selection[$this->id][$elementCategoryId])))) {
+                                          $likeUrl = sprintf("%s/hotels/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                                          $likeClass = 'ln-unlike';
+                                          $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                                          $likeAltText = 'Unlike';
+                                          $likeImageClass = 'ln-img-unlike';
+                                          } else {
+                                          $likeUrl = sprintf("%s/hotels/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                                          $likeBtn = 'themes/default/themeimages/ic-like.png';
+                                          $likeAltText = 'Like';
+                                          $likeClass = 'ln-like';
+                                          $likeImageClass = 'ln-img-like';
+                                          }
+                                          } else {
+                                          $likeUrl = sprintf("%s/hotels/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                                          $likeBtn = 'themes/default/themeimages/ic-like.png';
+                                          $likeAltText = 'Like';
+                                          $likeClass = 'ln-like';
+                                          $likeImageClass = 'ln-img-like';
+                                          }
+                                          } */
+                                        ?>
+                                        <a class="img-ln <?php echo $likeClass; ?>" href="<?php print $likeUrl; ?>">
+                                            <img src="<?php echo $thumb; ?>" title ="<?php echo $item['one_line_desc'] ?>" alt="<?php echo $item['heading'] ?>" width="120" height="120" />
+                                        </a>
+                                        <span class="snipit">
+                                            <a href="javascript:void(0);" class="content-infopop hover-icon nobrdright"><img src="<?php echo $this->theme('themes/default/themeimages/ic-info.png') ?>" alt="Info" class="hover-icon-info" border="0" /></a> 
+                                            <a href="<?php print $detailUrl; ?>" class="hover-icon-more">more</a>
+                                            <a href="<?php print $likeUrl; ?>" class="hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>"><img src="<?php echo $this->theme($likeBtn) ?>" alt="<?php echo $likeAltText; ?>" class="hover-icon-like" border="0" /></a>
+                                        </span>
+                                    </div>
+                                    <div class="slide-caption">
+                                        <span class="holiday-caption-title"><a href="<?php print $detailUrl; ?>"><?php echo $item['heading'] ?></a></span> 
+                                        <br /><span class="holiday-caption-desc"><?php echo $item['one_line_desc']; ?></span>
+                                    </div>                                            
+                                    <input type ="hidden" class="content-info-id" value ="<?php echo $key ?>"/>    
+                                    <div id="detail-view-<?php echo $key; ?>" style="display:none">
+                                        <h2><?php echo $item['heading']; ?></h2>
+                <?php echo '<p>' . $item['three_line_desc'] . '</p>'; ?>
+                                        <a href="<?php print $detailUrl; ?>" class="link-button">Details</a>
+
+                                    </div>
+                                </li>
+            <?php }
+            ?>
+                        </ul>
+                        <div class="clear"></div>
+                    </div>
+                    <?php
+                }
+            } else {
+                echo "No Records(0)";
+            }
+            ?>
+
+        </div>
+    </div>
+<?php } ?>
+
+<!--******************************************* ACTIVITIES ENDS *******************************--> 
+<div id="rightpanel">
+    <div class="rightcontentbox">
+        <h2>Suggested Services</h2>
+
+        <?php
+        foreach ($this->elementDetail as $dtl) {
+            $params = sprintf("company_id=%s&element_dtl_id=%s", $dtl->company_id, $dtl->element_dtl_id);
+            $cipherQuery = $this->rijndael->encrypt($params);
+            ?>
+
+            <div class="otherhotelslistwrapper">
+                <form action="<?php echo $this->siteUrl() . "/default/serviceprovider/book"; ?>" method="post" >
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $fn = '';
+                        if ($dtl->image_url) {
+                            $fn = end(explode('/', $dtl->image_url));
+                        }
+
+                        $thumbPath = 'uploads' . DS . 'element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . rawurlencode($fn);
+                        $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                        if (is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/uploads/element/thumbnails/120x120/images/%s", $this->baseUrl(), $fn);
+                        }
+                        //$dtlUrl = $this->siteUrl() . "/serviceprovider/detail/?q=$cipherQuery";
+                        $dtlUrl = "javascript:void(0);";
+                        ?>
+                        <a href="<?php echo $dtlUrl; ?>">
+                            <img height="70" width="70" src="<?php echo $thumbUrl; ?>"/>
+                        </a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                        <h3 class="right-title"><?php echo $dtl->description; ?></h3>
+                        <span class="holiday-caption-desc">Hotel: <?php echo ucwords($dtl->company_name); ?></span><br />
+                        <span class="holiday-caption-desc">Price: $<?php echo number_format($dtl->price, 2) ?></span><br />   
+                    </div>
+                    <div class="clear"></div>
+                        <?php $cip = $this->rijndael->encrypt('element-' . $dtl->element_dtl_id); ?>
+                    <div class="list-duration">
+    <?php $cip = $this->rijndael->encrypt('element-' . $dtl->element_dtl_id); ?>
+                        <a class="back-button" href="<?php echo $this->siteUrl() . '/serviceprovider/book/' . $cip . '.html'; ?>" >Book Now</a>
+                    </div>
+                </form>
+            </div>
+<?php } ?>  
+    </div>
+</div>
+<div class="clear"></div>
+<div class="eightpxseparator"></div>
+
+<!-- TOP SELLING HOLIDAYS CAROUSIL SCRIPT -->
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('ul.jcarousel-hotels , #mycarousel1').jcarousel({
+            
+        });
+        
+        /*$('.activities-item').click(function() {
+            var $this = $(this);
+            var id = $(this).attr('id');   
+            var idParts = id.split('-');
+            var cid = idParts[3];
+            window.location = site.baseUrl + '/hotels';          
+        }); */
+    });
+</script>
+

@@ -1,0 +1,236 @@
+<?php $this->headLink()->appendStylesheet($this->baseUrl() . '/css/booking.css'); ?>
+<div id="customize-package">
+    <div id="package-configuration-wrapper">
+        <div id="package-configuration-leftpanel">
+            <?php
+            if (isset($this->elementDetail)) {
+                $dtl = $this->elementDetail;
+                $arr = explode("/", $dtl->image_url);
+                $imageName = $arr[sizeof($arr) - 1];
+                ?>
+                <div class="description-element-detail">
+                    <h2><?php echo $dtl->name . " at " . ucwords($dtl->company); ?></h2>
+
+                    <?php if (is_file($this->basePath() . DS . 'uploads' . DS . 'images' . DS . 'Element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $imageName)) : ?>
+                        <div class="img-field">
+                            <img src="<?php printf("%s/uploads/images/Element/thumbnails/120x120/images/%s", $this->baseUrl(), rawurlencode($imageName)); ?>" />
+                        </div>
+                    <?php endif; ?>
+
+                    <span class="holiday-caption-title"><?php echo ucwords($dtl->servicename); ?> : </span>
+                    <span class="holiday-caption-desc"><?php echo ucwords($dtl->serviceclass); ?></span><br />
+                    <span class="holiday-caption-title">Price : </span>
+                    <span class="holiday-caption-desc">$<?php echo ucwords($dtl->price); ?></span><br />
+                    <span class="holiday-caption-title">Location : </span>
+                    <span class="holiday-caption-desc"> <?php echo ucwords($dtl->Location); ?></span><br />
+                    <span class="holiday-caption-title">Detail : </span>
+                    <span class="holiday-caption-desc"> <?php echo ucwords($dtl->description); ?></span><br />
+                    <span class="book-element">
+                        <input type="hidden" name="element_dtl_id" value="<?php echo $dtl->element_dtl_id; ?>" />
+                    </span>
+
+                </div>
+                <div class="clear"></div>
+            <?php } elseif ($this->package) { ?>
+                <?php if (isset($this->package->event_id)) { ?>
+                    <input type="hidden" name="event_id" value="<?php echo $this->package->event_id; ?>" />
+                <?php } else { ?>
+                    <input type="hidden" name="package_id" value="<?php echo $this->package->package_id; ?>" />
+                <?php } ?>
+                <h2>Your Selected Trip</h2>
+                <div><h3><?php echo $this->package->title; ?></h3>
+                    <?php
+                    if (isset($this->package->file_name)) {
+                        $filename = $this->package->file_name;
+                        $thumbpath = 'package' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $filename;
+                        if (is_file($this->basePath() . DS . $thumbpath)) {
+                            printf("<div class='img-thumbnail'><img src='%s/package/thumbnails/120x120/images/%s' /></div>", $this->baseUrl(), rawurlencode($filename));
+                        }
+                    }
+                    ?>
+
+                    <div class="desc word-limiter-text-trimmed" style="font-size:12px;">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($this->package->description), 450);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                                        <a class="read-more" href="<?php echo $_SERVER['REQUEST_URI']; ?>">more...</a>                        
+                        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+                        <?php print $this->package->description; ?><br />
+                        <a class="read-less" href="javascript:void(0);">...less</a>
+                    </div>
+                    <div class="clear"></div>
+
+                </div>
+                <div class="eightpxseparator"></div>
+                <div class="configuration-packagefacts">
+                    <div class="inforow"><strong>Duration:</strong>  
+                        <?php
+                        if (isset($this->package->no_of_days)) {
+                            print $this->package->no_of_days ." days";
+                        } else {
+                            echo (strtotime($this->package->end_dt) - strtotime($this->package->start_dt)) / (60 * 60 * 24) . " days";
+                        }
+                        ?>
+                    </div>
+                    <div class="inforow"><strong>Grade:</strong> Easy</div>
+                    <div class="inforow"><strong>Price:</strong> 
+                        <span id="customize-cost-value">
+                            <?php
+                            if (!isset($this->package->total_price)) {
+                                echo '$' . number_format($this->package->total_cost, 2);
+                            } else {
+                                echo '$' . number_format($this->package->total_price, 2);
+                            }
+                            ?></span></div>
+                    <div class="inforow"><span class="txtsmall">Including Taxes</span></div>
+                </div>
+                <div class="eightpxseparator"></div>
+            <?php } ?>
+            <?php
+            $params = sprintf("booking_id=%s&encryption=%s", $this->bookingId, rand());
+            $cipherQuery = $this->rijndael->encrypt($params);
+            ?>
+        </div>
+        <div id="package-configuration-main">
+            <img src="<?php echo $this->baseUrl() . '/images/step2-active.gif'; ?>"  usemap="#Map" />
+            <br />
+            <map name="Map" id="Map">
+                <area shape="rect" coords="1,1,213,60" href="<?php echo $this->baseUrl() . '/serviceprovider/edit-book/?q=' . $cipherQuery; ?>" alt="Initialize Booking" />
+            </map>
+            <fieldset>
+                <legend>
+                    Add Details
+                </legend>
+                <?php print $this->partial('_flashMessages.phtml'); ?>
+                <div class="note-wrapper">
+                <?php if(Zend_Auth::getInstance()->getIdentity()->status=='D'){ ?>
+                    <div>
+                    Your activation link is sent to your email. Click on the link to activate your account in the website.
+                    </div>
+                <?php } ?>
+                   <span class="note"><span>Note: </span>  Total cost is calculated on a per adult basis. We shall review your booking and send a confirmation through email.</span>
+                </div>
+                <?php if ($this->form) { ?>
+                    <div id="booking-save">
+                        <form action = "<?php echo $this->siteUrl() . "/serviceprovider/book-detail/?q=" . $cipherQuery; ?>" method="post">
+                            <table>
+                                <tr>
+                                    <th>
+                                        SN  
+                                    </th>
+                                    <th>
+                                        Full Name
+                                    </th>
+                                    <th>
+                                        Email
+                                    </th>
+                                    <th>
+                                        Date of Birth
+                                    </th>
+                                    <th>
+                                        Any Restriction
+                                    </th>
+                                </tr>
+                                <?php $i = 0;
+                                foreach ($this->form->getSubForms() as $subform) {
+                                    if($i==0){
+                                        echo "<tr>
+                                                <td class='child-title' colspan='5'><span>Adult's Information</span></td>
+                                              </tr>";
+                                    }
+                                    elseif($i==$this->adult){
+                                        echo "
+                                        <tr>
+                                        <td colspan='5'>&nbsp;</td>
+                                        </tr>
+                                        <tr>
+                                            <td class='child-title' colspan='5'><span>Children's Information</td>
+                                        </tr>";
+                                    }
+                                    ?>
+                                    <tr>
+                                        <?php
+                                        
+                                        foreach ($subform->getElements() as $subelement) {
+                                            $childElement='';
+                                            if ($subelement->getType() == "Zend_Form_Element_Hidden") {
+                                                $j = $i+1;
+                                                echo "<td valign='top' class='book-detail-column'>
+                                                      <strong>Person $j" . $subelement . "</strong>
+                                                      </td>";
+                                            } else {
+                                                if(0==$i AND $subelement->getLabel()=='Date of Birth'){
+                                                    $subelement->setAttrib("class","adult-first-dob booking-age");
+                                                }
+                                                elseif($i<$this->adult AND $subelement->getLabel()=="Date of Birth"){
+                                                    $subelement->setAttrib("class","adult-dob booking-age");
+                                                }elseif($subelement->getLabel()=="Date of Birth"){
+                                                    $subelement->setAttrib("class","child-dob booking-age");
+                                                    $childElement = "<input class='hidden-element' type='hidden' name='bookings[".$i."][is_child]' value='Y'/>";
+                                                }
+                                                if ($subelement->getLabel() == 'Email' AND $i == 0) {
+                                                    $subelement->setAttrib("readonly", "readonly");
+                                                }
+                                                echo "<td valign='top' class='book-detail-column'>". $subelement .$childElement."</td>";
+                                            }
+                                        }
+                                        $i++;
+                                        ?>
+                                    </tr>
+                                    <?php } ?>
+                            </table>
+                            <?php
+                            $backLink = '<a class="back-button" href="' . $this->siteUrl() . '/serviceprovider/edit-book/?q=' . $cipherQuery . '">Back</a>';
+                            
+                            foreach ($this->form->getElements() as $element) {
+                                if ($element->getType() == "Zend_Form_Element_Submit") {
+                                    echo "<div class='submit-booking-wrapper'>" . $backLink . $element . "</div>";
+                                }elseif ($element->getType() == "Zend_Form_Element_MultiCheckbox") {
+                                    echo "<div class='terms-and-conditions'>" .  $element . "</div>";
+                                }
+                                else {
+                                    echo $element;
+                                }
+                            }
+                            ?>
+                        </form>
+                    </div>
+                    <?php
+                } else {
+                    echo "<h2>No Package Selected</h2> ";
+                }
+                ?>
+            </fieldset>
+        </div>
+    </div>
+    <div class="clear"></div>
+
+    <?php $this->headScript()->appendFile('/js/utility.js');
+    ?>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.child-dob').datepicker({
+            dateFormat: 'd M, yy',
+            yearRange: "-5:+0",
+            maxDate: 0,
+            changeYear: true
+        });
+        $(".adult-dob").datepicker({
+           dateFormat: 'd M, yy',
+           yearRange: "-82:-5",
+           maxDate: 0,
+           changeYear:true
+        });
+        $(".adult-first-dob").datepicker({
+           dateFormat: 'd M, yy',
+           yearRange: "-82:-18",
+           maxDate: 0,
+           changeYear:true
+        });
+    })
+</script>

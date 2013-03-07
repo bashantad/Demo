@@ -1,0 +1,6 @@
+<?php
+$this->form->submit->setLabel('Save');
+echo $this->form->setAction($this->url . $this->id);
+$this->headScript()->appendFile($this->baseUrl() . '/js/company/feature-add.js');
+$this->headScript()->appendFile($this->baseUrl() . '/js/company/select-box.js');
+?>

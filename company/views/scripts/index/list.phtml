@@ -1,0 +1,10 @@
+<?php
+$this->grid->render('pagination', true);
+echo $this->grid;
+$this->headScript()->appendFile($this->baseUrl() . '/js/address/list.js');
+$front = Zend_Controller_Front::getInstance()->getRequest();
+$module = $front->getModuleName();
+$controller = $front->getControllerName();
+$actionPath = '/'.$module.'/'.$controller.'/';
+?>
+<input class="action-path" type="hidden" name="action_path" value="<?php echo $actionPath; ?>" />

@@ -1,0 +1,17 @@
+<?php
+$this->headLink()->appendStylesheet(sprintf("%s/themes/default/jquery-components/themes/ui-lightness/jquery.ui.datepicker.css", $this->baseUrl()));
+$this->headLink()->appendStylesheet(sprintf("%s/themes/default/jquery-components/themes/ui-lightness/jquery.ui.theme.css", $this->baseUrl()));
+$this->headLink()->appendStylesheet(sprintf("%s/themes/default/jquery-components/themes/ui-lightness/jquery.ui.base.css", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.datepicker.min.js", $this->baseUrl()));
+?>
+
+<h1><?php echo $this->transaction['item_name'] . " [ Invoice No.: " . $this->transaction['invoice'] . " ]" ?></h1>
+<?php print $this->form; ?>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#date_creation").datepicker({
+            dateFormat:'yy-mm-dd'
+        });
+    })
+</script>

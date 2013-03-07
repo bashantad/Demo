@@ -1,0 +1,80 @@
+<style type="text/css">
+    .float-left {
+        float: left;
+    }
+    .tag-terms-wrapper {
+        border: 1px solid #CCCCCC;
+        max-height: 250px;
+        overflow: auto;
+    }
+    .tag-terms-wrapper-inner {
+        padding: 7px;
+    }
+    .tag-label {
+        text-transform: uppercase;
+    }
+    .tag-term {
+        width: 32%;
+        margin-right: 10px;
+    }
+    .tags-row {
+        margin-bottom: 20px;
+    }
+</style>
+<div class="tree-content">  
+    <div id ="tag-form">
+        <form id ="formid" method ="post" action="/content/index/tag">
+            <?php
+            if (count($this->elementHierarchy) > 0) {
+                $element_category_ids = array();
+                if (count($this->tags) > 0) {
+                    foreach ($this->tags as $key => $tags) {
+                        $element_category_ids[$tags['element_category_id']] = $tags['element_category_id'];
+                    }
+                }
+                $taxonomyTerms = array();
+                foreach ($this->elementHierarchy as $key => $data) {
+                    $taxonomyTerms[strtolower($data['element'])][$key] = $data;
+                }
+                ?>
+
+                <div>
+                    <div style="background: none repeat scroll 0 0 #DDDDDD;"><h2 style="margin-top:0;">Tags For <em>"<?php echo $this->title ?>"</em></h2></div>
+                    <?php foreach ($taxonomyTerms as $element => $terms) : ?>
+                        <div class="tags-row">
+                            <div id="<?php print strtolower(trim($element)) ?>-tag-wrapper">
+                                <div class="<?php print strtolower(trim($element)) ?>-tags">
+                                    <div class="tag-label"><strong><?php print ucwords($element); ?></strong></div>
+                                    <div class="tag-terms-wrapper">    
+                                        <div class="tag-terms-wrapper-inner"> 
+                                            <?php foreach ($taxonomyTerms[$element] as $element_category_id => $term) : ?> 
+                                                <?php print str_repeat("&nbsp;&nbsp;&nbsp;", $term['level']); ?>
+                                                <?php
+                                                $checked = array_key_exists($element_category_id, $element_category_ids) ? 'checked="checked"' : '';
+                                                ?>
+                                                <div class="tag-term float-left">
+                                                    <input type="checkbox" name="element_category_id[<?php print $element_category_id ?>]" value="<?php print $element_category_id ?>" <?php print $checked; ?>/>&nbsp; 
+                                                    <span><?php print ucwords($term['name']); ?></span>
+                                                </div> 
+                                            <?php endforeach; ?>
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <div class="clear blankseparator"></div>
+
+                <input type="hidden" name="type" value="T" />
+                <input id ="submitbutton" class ="form-submit tree-content-submit" type ="submit" value="Submit" name="submit"/>
+            </form>
+        </div>
+
+        <input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />
+    </div>
+<?php } ?>
+</div>

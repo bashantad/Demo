@@ -1,0 +1,11 @@
+<p><b>Are You Sure You Want To Delete Permanently?</b></p>
+<form action="/content/index/delete" method="post">
+<div>
+  <input type="hidden" name="id" value="<?php echo $this->content_id; ?>" />
+  <input type="submit" name="del" value="Yes" />
+  <input type="submit" name="del" value="No" />
+</div>
+</form>
+
+<?php include 'view.ajax.phtml';?>
+

@@ -1,0 +1,40 @@
+<h1>What others say</h1>
+<div class="leftmaincol-content">
+    <?php foreach ($this->relatedInspiration as $data): ?>
+        <?php
+        $title = trim(urlencode($data->title));
+        $id = $data->inspire_id;
+        $cipher = $this->rijndael->encrypt($id . '-' . $id);
+        $thumb = '/package/thumbnails/images/' . $data->file_name;
+        if (!is_file($this->basePath() . DIRECTORY_SEPARATOR . $thumb)) {
+            $thumb = sprintf("/images/no-image/70x70.jpg");
+        }
+        ?>
+        <div class="testimonials">
+            <!--<div class ="attractions-img">
+                <a href="<?php printf("%s/inspiration/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>">
+                    <img src="<?php echo $this->baseUrl() . $thumb ?>" alt="<?php echo $data->title; ?>" width="75" height="75" />
+                </a>
+            </div>-->
+            <div>
+                <a href="<?php printf("%s/inspiration/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>">
+                    <h3><?php echo $data->title ?></h3>
+                </a>
+            </div>
+
+
+            <?php
+            $output = $this->wordLimiter(strip_tags($data->one_line_desc), 100);
+            echo $output['text'];
+            ?>
+            <div class="quote-close">&nbsp;</div><br />
+            <br />
+            <div class="feedback-name"><?php echo $data->author ?><br /></div>
+
+            <div class="testimonials-dotted-separator">.................................................................................................................</div>
+        </div>
+        <?php endforeach ?>      
+</div>
+
+
+

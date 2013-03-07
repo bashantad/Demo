@@ -1,0 +1,270 @@
+<style type="text/css">
+    table th,td {
+        padding:5px;
+        margin:5px;
+    }
+    .float-left {
+        float: left;
+    }
+    .customize-itenary-price{
+        display:none;
+    }
+    .customize-itenary-day {
+        width: 10%;
+    }
+    .customize-itenary-title {
+        width: 50%;
+    }
+    .customize-itenary-service {
+        width: 20%;
+    }
+
+    #customize-package #customize-itenary-detail .odd {
+        background: none repeat scroll 0 0 #CCCCCC;
+    }
+    #customize-package #customize-itenary-detail .even {
+        background: none repeat scroll 0 0 #EFEFEF;
+    }
+    #customize-package #customize-itenary-detail .customize-itenary {
+        margin-bottom: 4px;
+    }
+    .hidden {
+        display: none;
+    }
+    .customize-itenary-day {
+        float: left;
+        font-size: 0.87em;
+        padding: 4px;
+        width: 4.375em;
+    }
+    .customize-itenary-title {
+        float: left;
+        font-size: 0.87em;
+        padding: 4px;
+        width: 26.25em;
+    }
+    .customize-itenary-service {
+        float: left;
+        font-size: 0.87em;
+        padding: 4px;
+        width: 13.875em;
+    }
+    .customize-itenary-link {
+        float: left;
+        font-size: 0.87em;
+        padding: 4px;
+        width: 4em;
+    }
+    .img-thumbnail{
+        display:inline;
+        float:left;
+        margin-right: 3px;
+    }
+    .desc{
+        padding-top:0;
+    }
+    #package-configuration-leftpanel.desc{
+        line-height: 2em;
+    }
+
+</style>
+
+<link href="<?php printf("%s/css/jquery.fancybox-1.3.4.css", $this->baseUrl()); ?>" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="<?php printf("%s/js/jquery.validate.min.js", $this->baseUrl()); ?>"></script>
+<script type="text/javascript" src="<?php printf("%s/js/jquery.fancybox-1.3.4.js", $this->baseUrl()); ?>"></script>
+<script type="text/javascript">
+    function number_format(number,decimals,dec_point,thousands_sep){var n=!isFinite(+number)?0:+number,prec=!isFinite(+decimals)?0:Math.abs(decimals),sep=(typeof thousands_sep==='undefined')?',':thousands_sep,dec=(typeof dec_point==='undefined')?'.':dec_point,s='',toFixedFix=function(n,prec){var k=Math.pow(10,prec);return''+Math.round(n*k)/k;};s=(prec?toFixedFix(n,prec):''+Math.round(n)).split('.');if(s[0].length>3){s[0]=s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g,sep);}
+    if((s[1]||'').length<prec){s[1]=s[1]||'';s[1]+=new Array(prec-s[1].length+1).join('0');}
+    return s.join(dec);}
+
+    $(function() {
+
+        var customizeElement = {};
+        $('.customize-ln-hotel, .customize-ln-transport').fancybox({
+            //$customize-itenary = $(this);
+            showActivity: true,
+            centerOnScroll: true,
+            onComplete: function(element, index, fb) {
+                customizeElement.link = $(element);
+            },
+            ajax: {}
+        });
+        
+        $( "#fromdate" ).datepicker({
+            dateFormat: 'yy-mm-dd',
+            changeYear: true
+        });
+        
+        $.validator.addMethod("greaterThan", 
+        function(value, element, params) {
+            if (!/Invalid|NaN/.test(new Date(value))) {
+                return new Date(value) > new Date($(params).val());
+            }
+            
+            return isNaN(value) && isNaN($(params).val()) 
+                || (Number(value) > Number($(params).val())); 
+        },'Must be greater than {0}.');
+        
+        $('.customize-itenary-link-change').click(function() {
+            $(this).parents('.customize-itenary-inner').find('.customize-itenary-link-dtl').toggle();
+        });
+        $('.choose-itenary').live("click",function(){
+            var customizeParent = customizeElement.link.parents('.customize-itenary-inner');
+            var myparent = $(this).parents('tr:first');
+            
+            //to replace current row of itenary
+            var element_dtl_id = myparent.find('.element-detail-id').val();
+            var name = myparent.find('td:first').text(); 
+            var hotel = myparent.find('td:eq(1)').text() ;
+            var service = myparent.find('td:eq(2)').text();
+            var serviceType = myparent.find('td:eq(3)').text(); 
+            customizeParent.find('.customize-itenary-title').text(name + ' ' + hotel);
+            customizeParent.find('.customize-itenary-service').text(service + ' ' + serviceType);
+            customizeParent.find('.hidden-element-id').val(element_dtl_id);
+            
+            // to replace total price with new price total
+            var newPrice = Number($.trim(myparent.find('.price-per-element').text()));
+            var oldPrice = Number($.trim(customizeParent.find('.customize-itenary-price').text()));
+            
+            var oldTotalPrice = Number($.trim($('#grand-total-cost').text()));
+            var newTotalPrice = oldTotalPrice-oldPrice+newPrice;
+            
+            customizeParent.find('.customize-itenary-price').html(newPrice);
+            $('.total-cost-itenary-hidden').val(newTotalPrice);
+            $('#customize-cost-value').html('$'+number_format(newTotalPrice, 2));
+            $('#grand-total-cost').html(newTotalPrice);
+            return false;
+        });
+        $('.choose-transport').live("click",function(){
+            var customizeParent = customizeElement.link.parents('.customize-itenary-inner');
+            var myparent = $(this).parents('tr:first');
+            var element_dtl_id = myparent.find('.element-detail-id').val();
+            var service = myparent.find('td:first').text();
+            var serviceType = myparent.find('td:eq(1)').text();
+            customizeParent.find('.customize-itenary-service').text(service + ' ' + serviceType);
+            customizeParent.find('.hidden-element-id').val(element_dtl_id);
+            
+            // to replace total price with new price total
+            var newPrice = Number($.trim(myparent.find('.price-per-element').text()));
+            var oldPrice = Number($.trim(customizeParent.find('.customize-itenary-price').text()));
+            var oldTotalPrice = Number($.trim($('#customize-cost-value').text()));
+            var newTotalPrice = oldTotalPrice-oldPrice+newPrice;
+            customizeParent.find('.customize-itenary-price').html(newPrice);
+            $('.total-cost-itenary-hidden').val(newTotalPrice);
+            $('#customize-cost-value').text(newTotalPrice);
+            $('#grand-total-cost').html(newTotalPrice);
+            return false;
+        });
+        
+    });
+</script>
+<div id="customize-package">
+    <?php if ($this->package) { ?>
+        <div id="package-configuration-wrapper">
+            <div id="package-configuration-leftpanel">
+                <h2>Your Selected Trip</h2>
+                <div><h3><?php echo $this->package->title; ?></h3>
+                    <?php
+                    if ($this->package->file_name) {
+                        $filename = $this->package->file_name;
+                        $thumbpath = 'package' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $filename; 
+                        if (is_file($this->basePath() . DS . $thumbpath)) {
+                            printf("<div class='img-thumbnail'><img src='%s/package/thumbnails/120x120/images/%s' /></div>", $this->baseUrl(), rawurlencode($filename));
+                        }
+                    }
+                    ?>
+                    <div class="desc word-limiter-text-trimmed">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($this->package->description), 450);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                            <a class="read-more" href="<?php echo $_SERVER['REQUEST_URI']; ?>">more...</a>                        
+                        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+                        <?php print $this->package->description; ?><br />
+                        <a class="read-less" href="javascript:void(0);">...less</a>
+                    </div>
+                    <div class="clear"></div>
+
+                </div>
+                <div class="eightpxseparator"></div>
+                <div class="configuration-packagefacts">
+                    <div class="inforow"><strong>Duration:</strong> 
+                       <?php echo $this->packageDetail[sizeof($this->packageDetail)-1]->day . " days"; ?>
+                    </div>
+                    <div class="inforow"><strong>Grade:</strong> Easy</div>
+                    <div class="inforow"><strong>Price:</strong> 
+                        <span id="customize-cost-value">$<?php echo number_format($this->package->total_price, 2); ?></span>
+                        <span id="grand-total-cost" style="display:none;"><?php echo $this->package->total_price?></span>
+                    </div>
+
+                    <div class="inforow"><span class="txtsmall">Including Taxes</span></div>
+                </div>
+                <div class="eightpxseparator"></div>
+            </div>
+            <div id="package-configuration-main">
+                <div><h1>Your Customized Trip</h1></div>
+                <div class="eightpxseparator"></div>
+                <div class="eightpxseparator"></div>
+                <div id="customize-itenary">
+                    <div id="customize-itenary-inner">
+                        <?php $index = 0; ?>
+                        <div id="customize-itenary-detail">
+                            <div id="customize-itenary-detail-inner">
+                                <?php foreach ($this->packageDetail as $key => $detail) : ?>
+                                    <?php $oe = ( ($key + 1) % 2 == 0 ? 'even' : 'odd'); ?>
+                                    <div id="customize-itenary-<?php print $key + 1; ?>" class="customize-itenary <?php print $oe; ?>">
+                                        <div class="customize-itenary-inner">
+                                            <?php
+                                            if ($key > 0) {
+                                                if ($this->packageDetail[$key - 1]->day == $this->packageDetail[$key]->day) {
+                                                    $index++;
+                                                } else {
+                                                    $index = 0;
+                                                }
+                                            }
+                                            ?>
+                                            <div class="customize-itenary-price">
+                                                <?php printf("%d", $detail->price); ?>
+                                            </div>
+                                            <div class="customize-itenary-day float-left">
+                                                <?php printf("Day %d", $detail->day); ?>
+                                            </div>
+
+
+                                            <div class="customize-itenary-title float-left">
+                                                <?php print $detail->name . " - "; //. $detail->company_name;     ?>
+                                            </div>
+
+                                            <div class="customize-itenary-service float-left">
+                                                <?php print $detail->service_class . " " . $detail->service_name; ?>
+                                            </div>
+
+                                            <div class="clear"></div>
+
+
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="eightpxseparator">
+                    <div class="book">
+                             <?php $cip = $this->rijndael->encrypt('event-'.$this->package->event_id); ?>
+                        <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/?cipher='.$cip; ?>" >Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+    $this->headScript()->appendFile('/js/utility.js');
+    ?>
+    <div class="clear"></div>
+</div>
+</div> 

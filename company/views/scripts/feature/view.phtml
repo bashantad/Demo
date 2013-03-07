@@ -1,0 +1,109 @@
+<div class="tree-content">
+    <div id="nad-content" class="nad-content">
+        <div id="content-inner">
+            <div id="content-heading">
+                <div class="field-label">
+                    <label>Name :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->name; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="content-keyword">
+                <div class="field-label">
+                    <label>Short name :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->short_name; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="content-metatag">
+                <div class="field-label">
+                    <label>Feature type :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->feature_type; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Company Type :  </label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->company_type; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Entered by :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->entered_by; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Entered date :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->feature->entered_dt; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Checked ?</label>
+                </div>
+                <div class="field-data">
+                    <?php print $checked = ($this->feature->checked == 'Y') ? 'Yes' : 'No'; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Checked by :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $checked_by = ($this->feature->checked_by) ? $this->feature->checked_by : 'None'; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Parent Feature :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $parent_feature = ($this->parent_feature) ? $this->parent_feature : 'None'; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-status">
+                <div class="field-label">
+                    <label>Enabled :</label>
+                </div>
+                <div class="field-data">
+                    <?php if ($this->feature->status == 'E') { ?>
+                        <img src="/themes/admin/default/images/others/tick-on-white.gif" alt="Checked"/> 
+                        <?php
+                    } else {
+                        ?>
+                        <img src="/themes/admin/default/images/others/cross-on-white.gif" alt="unchecked" />
+                        <?php
+                    }
+                    ?>                    
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+</div>
+

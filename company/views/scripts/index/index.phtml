@@ -1,0 +1,10 @@
+<a href="/company/index/add">Add new company</a>
+<?php foreach($this->companies as $company){ ?>
+<div class="user-role">
+    <?php echo $company->name; ?> | <a href ="/company/company/delete/id/<?php echo $company->company_id; ?>">Delete</a>
+    | <a href ="/company/company/edit/id/<?php echo $company->company_id; ?>">Edit</a>
+</div>
+<?php 
+}
+?>
+

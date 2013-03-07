@@ -1,0 +1,31 @@
+<h1>Contact Us</h1>
+<div class="leftmaincol-content">
+    <?php if (isset($this->message)): ?>
+    <div id="msg-div" class="note-wrapper">
+        <span class="note"><?php print $this->message; ?></span>
+    </div>
+    <?php endif; ?>
+    
+    <div id="contact-us-col-left">
+        <div id="contact-us-address">
+            <b>iTtravel Pvt. Ltd</b><br/>
+            Heritage Plaza II<br/>        
+            Email: info [at] nepaladvisor [dot] com<br/>
+            Phone: +977-01-4169132<br/>       
+        </div>
+        
+        <div id="contact-us-form">
+            <div id="contact-us-form-wrapper">
+                <fieldset>
+                    <legend><h3>Feedback Form</h3></legend>
+                    <?php print $this->form; ?>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    
+    <div id="contact-us-col-right" style="float: right">
+        <iframe width="300" height="440" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Heritage+Plaza,+Kathmandu,+Central+Region,+Nepal&amp;aq=2&amp;oq=kathmandu+heritage&amp;sll=37.0625,-95.677068&amp;sspn=45.553578,93.076172&amp;ie=UTF8&amp;hq=&amp;hnear=Heritage+Plaza,+Bagbazar,+Kathmandu,+Bagmati,+Central+Region+44600,+Nepal&amp;t=m&amp;ll=27.717421,85.320683&amp;spn=0.028873,0.025663&amp;z=14&amp;iwloc=A&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Heritage+Plaza,+Kathmandu,+Central+Region,+Nepal&amp;aq=2&amp;oq=kathmandu+heritage&amp;sll=37.0625,-95.677068&amp;sspn=45.553578,93.076172&amp;ie=UTF8&amp;hq=&amp;hnear=Heritage+Plaza,+Bagbazar,+Kathmandu,+Bagmati,+Central+Region+44600,+Nepal&amp;t=m&amp;ll=27.717421,85.320683&amp;spn=0.028873,0.025663&amp;z=14&amp;iwloc=A" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+    </div>
+    <div class="clear"></div>
+</div>

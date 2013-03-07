@@ -1,0 +1,70 @@
+<div id="booking-detail">
+ <?php if ($this->form) { ?>
+    <div id="booking-save">
+            <table>
+                <tr>
+                    <th>
+                        SN  
+                    </th>
+                    <th>
+                        Full Name
+                    </th>
+                    <th>
+                        Email
+                    </th>
+                    <th>
+                        Date of Birth
+                    </th>
+                    <th>
+                        Any Restriction
+                    </th>
+                </tr>
+                <?php $i = 0;
+                foreach ($this->form->getSubForms() as $subform) {
+                    if($i==0){
+                        echo "<tr>
+                                <td class='child-title' colspan='5'><span>Adult's Information</span></td>
+                              </tr>";
+                    }
+                    elseif($i==$this->adult){
+                        echo "
+                        <tr>
+                            <td class='child-title' colspan='5'><span>Children's Information</td>
+                        </tr>";
+                    }
+                    ?>
+                    <tr>
+                        <?php
+                        
+                        foreach ($subform->getElements() as $subelement) {
+                            $childElement='';
+                            if ($subelement->getType() == "Zend_Form_Element_Hidden") {
+                                echo "<td valign='top' class='book-detail-column'>
+                                      <strong>Person$i</strong>
+                                      </td>";
+                            } else {
+                                if(0==$i AND $subelement->getLabel()=='Date of Birth'){
+                                    $subelement->setAttrib("class","adult-first-dob booking-age form-text");
+                                }
+                                elseif($i<$this->adult AND $subelement->getLabel()=="Date of Birth"){
+                                    $subelement->setAttrib("class","adult-dob booking-age form-text");
+                                }elseif($subelement->getLabel()=="Date of Birth"){
+                                    $subelement->setAttrib("class","child-dob booking-age form-text");
+                                    $childElement = "<input class='hidden-element' type='hidden' name='bookings[".$i."][is_child]' value='Y'/>";
+                                }
+                                if ($subelement->getLabel() == 'Email' AND $i == 0) {
+                                    $subelement->setAttrib("readonly", "readonly");
+                                }
+                                echo "<td valign='top' class='book-detail-column'>". $subelement .$childElement."</td>";
+                            }
+                        }
+                        $i++;
+                        ?>
+                    </tr>
+                    <?php } ?>
+            </table>
+    </div>
+<?php
+}
+?>
+</div>

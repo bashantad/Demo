@@ -1,0 +1,41 @@
+
+<?php
+$details = array();
+foreach ($this->companyDetails as $feature) {
+    $details[$feature->company_feature_id] = $feature->feature_desc;
+}
+if (null != $this->features) {
+    ?>
+    <h2>Maintain Feature Details of <?php echo $this->company_name ?></h2>
+    <form action="" method="post">
+        <?php
+        foreach ($this->features as $feature) {
+            if ('FLAG' == $feature['feature_type']) {
+                $selected = (isset($details[$feature['company_feature_id']])) ? 'checked' : '';
+                ?>
+                <div class="company-feature">
+                    <?php echo $feature['name'] . "?"; ?>
+                    <input type="checkbox" <?php echo $selected; ?> name="desc[<?php echo $feature['company_feature_id']; ?>]" value="yes" />Yes
+                </div>
+                <?php
+            } elseif ('DESCRIPTION' == $feature['feature_type']) {
+                ?>  
+                <div class="feature-desc">
+                    <?php echo $feature['name'] . "?"; ?>
+                    <br /><textarea name="desc[<?php echo $feature['company_feature_id']; ?>]" rows="4" class="form-textarea" cols="30"><?php
+            if (isset($details[$feature['company_feature_id']])) {
+                echo $details[$feature['company_feature_id']];
+            }
+                    ?></textarea>
+                </div>
+                <?php
+            }
+        }
+        ?>
+        <input type="submit" name="submit" value="Save" class="form-submit"/>
+    </form>
+    <?php
+} else {
+    echo "<h3>There are no features available for this category. <a href=\"/company/feature/add\">Add features</a></h3>";
+}
+?>

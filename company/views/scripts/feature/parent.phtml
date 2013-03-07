@@ -1,0 +1,15 @@
+<select class="form-select" name ="upper_feature_id">
+    <?php
+    if (null != $this->features) { ?>
+        <option value="0">--Select--</option>
+        <?php foreach ($this->features as $feature):
+            ?>
+            <option value="<?php echo $feature['company_feature_id']; ?>"><?php echo $feature['name']; ?></option>
+            <?php
+        endforeach;
+    }
+    else {
+        ?>
+        <option value="0">--No Parent Features--</option>
+    <?php } ?>
+</select>

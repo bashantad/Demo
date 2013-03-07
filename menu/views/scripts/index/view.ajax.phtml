@@ -1,0 +1,139 @@
+<div class="tree-content">
+    <div id="nad-content" class="nad-content">
+        <div id="content-inner">
+            <div id="content-heading">
+                <div class="field-label">
+                    <label>Short Name :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['short_name']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="content-keyword">
+                <div class="field-label">
+                    <label>Short name :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['label']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="content-metatag">
+                <div class="field-label">
+                    <label>Link Url :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['link_url']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Link Alias :  </label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['link_alias']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Entered by :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['entered_by']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Entered date :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $this->menu['entered_dt']; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Checked ?</label>
+                </div>
+                <div class="field-data">
+                    <?php print $checked = ('Y' == strtoupper($this->menu['checked'])) ? 'Yes' : 'No'; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description">
+                <div class="field-label">
+                    <label>Checked by :</label>
+                </div>
+                <div class="field-data">
+                    <?php print $checked_by = ($this->menu['checked_by']) ? $this->menu['checked_by'] : 'None'; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div id="content-description" class="menu-status">
+                <div class="field-label">
+                    <label>Status :</label>
+                </div>
+                <div class="field-data">
+                    <?php $href_title = ('D' == strtoupper($this->menu['status']) ? 'Click the icon to enable' : 'Click the icon to disable'); ?>
+                    <?php /*
+                    <a class="<?php print ('D' == strtoupper($this->menu['status']) ? 'stat-en' : 'stat-dis') ?>" href="javascript:void(0);" title="<?php print $href_title; ?>">&nbsp;&nbsp;&nbsp;</a>
+                     */ ?>
+                    <a class="<?php print ('D' == strtoupper($this->menu['status']) ? 'stat-dis' : 'stat-en') ?>" href="javascript:void(0);" title="<?php print $href_title; ?>">&nbsp;&nbsp;&nbsp;</a>
+                    <span class="stat-txt"><?php print $href_title;  ?></span>
+                    <span class="stat-type hidden">status</span>
+                </div>
+            </div>
+            <div id="content-description" class="menu-status">
+                <div class="field-label">
+                    <label>Visible :</label>
+                </div>
+                <div class="field-data">
+                    <?php $href_title = ('N' == strtoupper($this->menu['visible']) ? 'Click the icon to make visible' : 'Click the icon to make invisible'); ?>
+                    <?php /*
+                    <a class="<?php print ('N' == strtoupper($this->menu['visible']) ? 'stat-en' : 'stat-dis') ?>" href="javascript:void(0);" title="<?php print $href_title; ?>">&nbsp;&nbsp;&nbsp;</a>
+                     */ ?>
+                    <a class="<?php print ('N' == strtoupper($this->menu['visible']) ? 'stat-dis' : 'stat-en') ?>" href="javascript:void(0);" title="<?php print $href_title; ?>">&nbsp;&nbsp;&nbsp;</a>
+                    <span class="stat-txt"><?php print $href_title;  ?></span>
+                    <span class="stat-type hidden">visibility</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.stat-en, .stat-dis').bind('click', function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            var menuId = 0;
+            if ($('.treeview').find('.active').length) {
+                menuId = Number($('.treeview').find('.active').attr('id').replace('term-link-', ''));
+            }
+            if (menuId) {
+                var $this = $(this);
+                $.ajax({
+                    type: 'POST',
+                    url: site.baseUrl + '/menu/index/' + $.trim($this.parent().find('.stat-type').text()),
+                    data: 'mid=' + menuId,
+                    dataType: 'json',
+                    success: function(res) {
+                        $this.removeClass('stat-en stat-dis').addClass(res.cls).attr('title', res.title);
+                        $this.parent().find('.stat-txt').text(res.title);
+                    },
+                    error: function() {
+                        
+                    }
+                });
+            }
+        });
+    });
+</script>

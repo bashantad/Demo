@@ -1,0 +1,210 @@
+<style>
+    .booking-type{
+        text-decoration: underline;
+    }
+    .booknow{
+        float:right;
+    } 
+</style>
+<script type="text/javascript" src="<?php printf("%s/js/utility.js", $this->baseUrl()); ?>"></script>	
+
+<div id="leftmaincol">
+    <?php
+    $customArray = array();
+    $allBookings = array();
+    ?>
+    <h2> My Bookings </h2>
+    <?php echo $this->partial('_flashMessages.phtml', array('popup' => FALSE)); ?> 
+    <?php if ($this->results) { ?>
+        <?php
+        foreach ($this->results as $row):
+            array_push($customArray, $row->package_id);
+            $bookings = array();
+            $bookings['booking_id'] = $row->booking_id;
+            $bookings['payment_status'] = $row->payment_status;
+            if ('ELEMENT' == $row->booking_type) {
+                $bookings['booking_dt'] = $row->booking_dt;
+                $bookings['title'] = $row->element_title;
+                $bookings['cost'] = $row->element_cost;
+                $bookings['description'] = $row->element_description;
+                $bookings['image'] = $row->element_image;
+                $params = sprintf("company_id=%s&element_dtl_id=%s", $row->company_id, $row->element_dtl_id);
+                $cipherQuery = $this->rijndael->encrypt($params);
+                $bookings['url'] = $this->siteUrl() . "/serviceprovider/detail/?q=$cipherQuery";
+                $allBookings['Nepaladvisor Service Booking(s)'][] = $bookings;
+            } elseif ('PACKAGE' == $row->booking_type) {
+                $bookings['booking_dt'] = $row->booking_dt;
+                $bookings['title'] = $row->package_title;
+                $bookings['cost'] = $row->package_cost;
+                $bookings['description'] = $row->package_description;
+                $bookings['image'] = $row->package_image;
+                $bookings['url'] = sprintf("%s/holidays/%s/%s.html", $this->siteUrl(), urlencode($row->package_title), $this->rijndael->encrypt($row->package_id));
+                $allBookings['Nepaladvisor Holiday Booking(s)'][] = $bookings;
+            } elseif ('EVENT' == $row->booking_type) {
+                $bookings['booking_dt'] = $row->booking_dt;
+                $params = sprintf("event_id=%s", $row->event_id);
+                $cipherQuery = $this->rijndael->encrypt($params);
+                $bookings['title'] = $row->event_title;
+                $bookings['cost'] = $row->event_cost;
+                $bookings['description'] = $row->event_description;
+                $bookings['image'] = $row->event_image;
+                $bookings['url'] = $this->siteUrl() . "/default/package/detail/?q=$cipherQuery";
+                $allBookings['My Customize Holiday Booking(s)'][] = $bookings;
+            }
+        endforeach;
+        ?>
+        <?php foreach ($allBookings as $type => $book) { ?>
+            <h3 class="booking-type"><?php echo $type; ?></h3>
+            <?php foreach ($book as $booking) { ?>
+                <div id="listitemswrapper">
+                    <div class="listitems">
+                        <div class="listitemsright">
+                            <div class="title"><a href="<?php echo $booking['url']; ?>"><h2><?php echo $booking['title']; ?></h2></a></div>
+                            <div class="desc word-limiter-text-trimmed">
+                                <?php
+                                $outputText = $this->wordLimiter(strip_tags($booking['description']), 450);
+                                print $outputText['text'];
+                                ?><br />
+                                <?php if ($outputText['isTrimmed']) : ?>
+                                    <a class="read-more" href="javascript:void(0);">more...</a>                        
+                                <?php endif; ?>
+                            </div>
+                            <div class="desc word-limiter-text-all" style="display:none;">
+                                <?php print $booking['description']; ?><br />
+                                <a class="read-less" href="javascript:void(0);">...less</a>
+                            </div>
+                            <div class="edit-trip-wrapper">
+                                <?php
+                                $params = sprintf("booking_id=%s", $booking['booking_id']);
+                                $cipherQuery = $this->rijndael->encrypt($params);
+                                ?>
+                                <?php
+                                $stat = '';
+                                if($booking['payment_status'])
+                                        $stat = strtolower($booking['payment_status']);
+                                if($stat=='pending' || !$stat): ?>
+                                <div class="edit-trip">
+                                    <a href="<?php echo $this->siteUrl() . "/serviceprovider/cancel/?q=$cipherQuery"; ?>">Cancel</a>
+                                </div>
+                                <?php endif; ?>
+                                <?php if($stat): ?>
+                                <div class="edit-trip book-status-<?php print $stat;?>">
+                                    <span><?php print ucwords($stat); ?></span>
+                                </div>
+                                <?php else: ?>
+                                    <div class="edit-trip">
+                                        <a href=" <?php echo $this->baseUrl() . '/serviceprovider/edit-book/?q=' . $cipherQuery; ?>">Edit Booking</a>
+                                    </div>
+                                    <div class="edit-trip">
+                                        <a href="<?php echo $this->siteUrl() . "/payment/index/checkout/?q=$cipherQuery"; ?>">Buy</a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                        <div class="listitemsleft">
+                            <div class="thmbimg">
+                                <?php
+                                $thumbPath = '';
+                                $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                                if ($booking['image'] != '') {
+                                    $image = rawurldecode($booking['image']);
+                                    $filePath = $image;
+                                    $image = explode('/', $filePath);
+                                    if (sizeof($image) == 1) {
+                                        $image = explode('/', $filePath);
+                                    }
+                                    $imageName = $image[sizeof($image) - 1];
+                                    if ('Nepaladvisor Service Booking' == $type) {
+                                        $thumbNail = "/uploads/images/Element/thumbnails/images/190x105/" . $imageName;
+                                        $thumbPath = $this->basePath() . DS . "uploads" . DS . "images" . DS . "Element" . DS . "thumbnails" . DS . "190x105" . DS . "images" . DS . $imageName;
+                                        if (file_exists($thumbPath)) {
+                                            $thumbUrl = $this->baseUrl() . "/uploads/images/Element/thumbnails/190x105/images/" . rawurlencode($imageName);
+                                        }
+                                    } else {
+                                        $thumbNail = '/package/thumbnails/190x105/images/' . $imageName;
+                                        $thumbPath = $this->basePath() . DS . "package" . DS . "thumbnails" . DS . "190x105" . DS . "images" . DS . $imageName;
+                                        if (file_exists($thumbPath)) {
+                                            $thumbUrl = $this->baseUrl() . "/package/thumbnails/190x105/images/" . rawurlencode($imageName);
+                                        }
+                                    }
+                                    ?>
+                                <?php }
+                                ?>
+                                <img alt="no-image"src="<?php echo $thumbUrl; ?>" />
+                            </div>
+                            <div class="list-ratings">Total Cost: $<?php echo number_format($booking['cost'], 2); ?></div>
+                            <div class="list-ratings">Booking Date: <?php echo date('jS M, Y', strtotime($booking['booking_dt'])); ?></div>
+
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+                <div>&nbsp;</div>
+                <?php
+            }
+        }
+    } else {
+        echo "<h2>You don't have any booked packages.<h2>";
+    }
+    //$this->headScript()->appendFile('/js/utility.js');
+    ?>
+</div>
+<div id="rightpanel">
+    <div class="rightcontentbox">
+        <h2>Suggested Holidays</h2>
+        <?php
+        if ($this->relatedServices) {
+            foreach ($this->relatedServices as $dtl) {
+                if (in_array($dtl['package_id'], $customArray)) {
+                    continue;
+                }
+
+                $title = trim($dtl['title']);
+                $cipher = $this->rijndael->encrypt($dtl['package_id']);
+                $packageDetailUrl = $this->siteUrl() . '/holidays/' . urlencode($title) . '/' . $cipher . '.html';
+                ?>
+                <div class="otherhotelslistwrapper">
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $filename = end(explode('/', $dtl['file_name']));
+                        $thumbUrl = sprintf("%s/package/thumbnails/images/%s", $this->baseUrl(), rawurlencode($filename));
+                        $thumbPath = "package" . DS . 'thumbnails' . DS . 'images' . DS . $filename;
+
+                        if (!is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                        }
+                        ?>
+
+                        <a href="<?php echo $packageDetailUrl; ?>">
+                            <img src ="<?php echo $thumbUrl; ?>" alt ="no-img"/>
+                        </a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                        <?php echo $dtl['title']; ?><br />
+                        <span class="holiday-caption-title">Duration:</span>
+                        <span class="holiday-caption-desc"><?php echo $dtl['no_of_days'] . " days"; ?></span><br />
+                        <span class="holiday-caption-title">Price:</span>
+                        <span class="holiday-caption-desc">$<?php echo number_format($dtl['total_cost'], 2); ?></span><br />
+                        <div class="booknow">
+                            <form action="<?php printf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $this->rijndael->encrypt('package-' . $dtl['package_id'])) ?>" method="post" >
+                                <input type="hidden" name="package_id" value="<?php echo $dtl['package_id']; ?>" />
+                                <input type="hidden" name="request_uri" value="<?php echo $_SERVER['REQUEST_URI']; ?>" />
+                                <input type="submit" name="book" id="signin_submit" value="Book Now" />
+                            </form>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="list-duration"></div>
+                </div>
+                <?php
+            }
+        }
+        ?>  
+    </div>
+</div>
+<div class="clear"></div>
+<div class="eightpxseparator"></div>
+
+
+

@@ -1,0 +1,112 @@
+<!-- PLACES GALLERY -->
+<script type="text/javascript" src="<?php echo $this->theme('js/jquery.fancybox-1.3.4.pack.js') ?>"></script>
+<script type="text/javascript" src="<?php echo $this->theme('js/places-galleryscripts/jquery.galleriffic.js') ?>"></script>
+<script type="text/javascript" src="<?php echo $this->theme('js/places-galleryscripts/jquery.opacityrollover.js') ?>"></script>
+<script src="<?php echo $this->theme('js/places-galleryscript.js') ?>"></script>
+<script src="<?php echo $this->theme("jquery-components/ui/jquery.ui.widget.js") ?>"></script>
+<script src="<?php echo $this->theme('jquery-components/ui/jquery.ui.tabs.js') ?>"></script>
+<link href="<?php echo $this->theme('styles/places-gallery.css') ?>" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="<?php echo $this->theme('styles/fancybox.css') ?>" media="screen" />
+
+<div id="singlecolumn">    
+    <?php $result = $this->results; var_dump($result);exit(); ?>    
+    <h1><?php echo $result['heading']; ?></h1>
+
+    <div id="gallerycontainer">        
+        <div id="thumbs" class="navigation">
+            <ul class="thumbs noscript">
+                <li>
+                    <a class="thumb" name="leaf" href="<?php echo $result['content_image_link']; ?>" title="<?php echo $result['heading']; ?>">
+                        <img src="<?php echo $result['content_image_link']; ?>" alt="no image" />
+                    </a>
+                </li> 
+                <?php
+                if (array_key_exists('images', $result)) {
+                    foreach ($result['images'] as $image) {
+                        ?>
+                        <li>
+                            <a class="thumb" name="leaf" href="<?php echo $image['file_path'] . '/images/' . $image['file_name']; ?>" title="<?php echo $image['file_name']; ?>">
+                                <img src="<?php echo $image['file_path'] . '/images/' . $image['file_name']; ?>" alt="<?php echo $image['file_name'] ?>" />
+                            </a>
+                        </li>  
+                    <?php }
+                } ?>
+            </ul>
+
+        </div>
+
+        <!-- Start Advanced Gallery Html Containers -->
+
+        <div id="gallery" class="content"> 
+            <div class="slideshow-container"> 
+                <div id="loading" class="loader"></div>
+                <div id="slideshow" class="slideshow"></div>
+            </div>
+            <div id="caption" class="caption-container"></div>
+        </div>
+        <div class="clear"></div>
+    </div>
+
+    <div class="blankseparator"></div>
+    <div class="maps-videos-panel" id="accordion">
+        <div><object width="420" height="315"><param name="WMode" value="transparent"></param><param name="movie" value="http://www.youtube.com/v/PEKH6RGEYug?version=3&amp;hl=en_US"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/PEKH6RGEYug?version=3&amp;hl=en_US" 	
+
+                                                                                                                                                                                                        wmode="transparent" type="application/x-shockwave-flash" width="292" height="210" allowscriptaccess="always" allowfullscreen="true"></embed></object></div>
+
+        <div><a href="<?php echo $this->theme('images/annapurna_map.gif') ?>" id="map"><img src="<?php echo $this->theme('images/annapurna-map-placeholder.jpg') ?>" alt="Annapurna Trekking Map" border="0" class="places-route-map"></a></div>
+
+
+    </div>
+
+    <?php if (array_key_exists('tabs', $result)) { ?>
+        <div class="demo">         
+            <div id="tabs">
+                <ul>
+                    <li><a href="<?php echo '#tab-' . $result['content_id'] ?>">Overview</a></li>  
+                    <?php foreach ($result['tabs'] as $tabs) { ?> 
+                        <li><a href="<?php echo '#tab-' . $tabs['tab_id'] ?>"><?php echo $tabs['tab_heading'] ?></a></li>              
+                    <?php } ?>                
+                </ul>
+                <div id="<?php echo "tab-" . $result['content_id']; ?>">
+                    <p><?php echo $result['description']; ?></p>
+                </div>
+                <?php foreach ($result['tabs'] as $tabs) { ?> 
+                    <div id="<?php echo "tab-" . $tabs['tab_id']; ?>">
+                        <p><?php echo $tabs['tab_description']; ?></p>
+                    </div>
+                <?php } ?> 
+            </div>        
+        </div>
+    <?php } ?>
+
+
+    <!--******************************************* MAIN CONTENT ENDS *******************************-->
+
+    <style>
+        #demo-frame > div.demo { padding: 10px !important; }
+        #ui-datepicker-div{z-index:100!important;}	
+    </style>
+    <script>
+        /* TOP SELLING HOLIDAYS CAROUSIL SCRIPT*/
+
+        jQuery(document).ready(function() {
+
+            jQuery('#mycarousel').jcarousel({
+                start: 3
+            });
+	
+            /* FOR LIGHT BOX */
+
+            jQuery("a#map").fancybox();
+        });
+
+    </script> 
+
+    <script type="text/javascript">
+        <!-- We only want the thunbnails to display when javascript is disabled -->
+			     	    
+        $(function() {
+            $( "#tabs" ).tabs();
+        });
+
+    </script>

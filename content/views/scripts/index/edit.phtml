@@ -1,0 +1,105 @@
+<div class="tree-content">
+    <?php
+    if ($this->content_img_link != "") {
+        $this->form->content_image_link->setDescription("<div id='image' onclick='openKCFinder(this)'><img id='img' src=$this->content_img_link style='width: 200px; height: 133px; margin-left: 0px; margin-top: 33px; visibility: visible;' alt ='Click here and select image on a double click'></div><b>Change image on a click</b>");
+    }
+   // echo $this->form;
+    echo $this->form->setAction($this->url.$this->id);
+    ?>
+</div>
+<style type="text/css">
+#image {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #000;
+    color: #fff;
+}
+#image img {
+    visibility: hidden;
+}
+
+</style>
+<script type="text/javascript">
+    function openKCFinderIframe(field) {  
+        var div = document.getElementById('kcfinder_div');   
+        if (div.style.display == "block") {
+            div.style.display = 'none';
+            div.innerHTML = '';
+            return;
+        }
+        window.KCFinder = {
+            callBack: function(url) {            
+                window.KCFinder = null;
+                field.value = url;
+                div.style.display = 'none';
+                div.innerHTML = '';
+                var path = $('#file_path').val()
+                //var path =  substr_replace(path,'/thumbnails/190x105/', strrpos(path, '/images'));
+                $("#package-file-path img").attr('src',path);  
+            }
+        };
+        var package_id = $('input[name=package_id]').val();
+        div.innerHTML = '<iframe name="kcfinder_iframe" src="/js/ckeditor/kcfinder/browse.php?type=images&dir=uploads/public&mode=package&id=' +package_id+
+            '" frameborder="0" width="100%" height="100%" marginwidth="0" marginheight="0" scrolling="no" />';
+        div.style.display = 'block';
+    }
+    
+    function openKCFinder(div) {
+        window.KCFinder = {
+            callBack: function(url) {
+            window.KCFinder = null;
+            div.innerHTML = '<div style="margin:5px">Loading...</div>';
+            var img = new Image();
+            img.src = url;
+            img.onload = function() {                
+                div.innerHTML = '<img id="img" src="' + url + '" />';
+                var img = document.getElementById('img');
+                var o_w = img.offsetWidth;
+                var o_h = img.offsetHeight;
+                var f_w = div.offsetWidth;
+                var f_h = div.offsetHeight;
+                if ((o_w > f_w) || (o_h > f_h)) {
+                    if ((f_w / f_h) > (o_w / o_h))
+                        f_w = parseInt((o_w * f_h) / o_h);
+                    else if ((f_w / f_h) < (o_w / o_h))
+                        f_h = parseInt((o_h * f_w) / o_w);
+                    img.style.width = f_w + "px";
+                    img.style.height = f_h + "px";
+                } else {
+                    f_w = o_w;
+                    f_h = o_h;
+                }
+                img.style.marginLeft = parseInt((div.offsetWidth - f_w) / 2) + 'px';
+                img.style.marginTop = parseInt((div.offsetHeight - f_h) / 2) + 'px';
+                img.style.visibility = "visible";
+                 $('#content_image_link').val(url);
+            }
+        }
+    };
+//    window.open('/js/ckeditor/kcfinder/browse.php?type=images&dir=images/public',
+//        'kcfinder_image', 'status=0, toolbar=0, location=0, menubar=0, ' +
+//        'directories=0, resizable=1, scrollbars=0, width=800, height=600'
+//    );
+    if ($('#kcfinder-frame').length) {
+        $('#kcfinder-frame').remove();
+    }
+    else {
+        var cid = $.trim($('#content_id').val());
+        var frame = '<iframe name="kcfinder_iframe" src="/js/ckeditor/kcfinder/browse.php?type=images&dir=images/public&mode=content&id=' +cid +
+                    '" frameborder="0" width="100%" height="200px" marginwidth="0" marginheight="0" scrolling="no" />';
+        $('#image').closest('.form-item').after('<div id="kcfinder-frame">'+frame+'</div>');
+    }
+}
+
+</script>
+<script type="text/javascript">	
+    $(document).ready(function() {
+        var instance = CKEDITOR.instances.description;
+        if(instance) {
+            CKEDITOR.remove(instance);
+        }
+        CKEDITOR.replace( 'description' );
+    });
+</script>

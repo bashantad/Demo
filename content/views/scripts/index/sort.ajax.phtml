@@ -1,0 +1,119 @@
+<!--******************************************* ACTIVITIES STARTS *******************************-->
+<select name="search_element_type" id="search-element-type" class="form-select">
+    <option value="">--Select Element--</option>
+    <?php
+    foreach ($this->elements as $element) :
+
+        $selected = '';
+        if ($element['element_id'] == $this->id) {
+            $selected = 'selected = "selected"';
+        }
+        if($element['name'] != "Holiday"){
+        ?>
+        <option value="<?php print $element['element_id']; ?>" <?php echo $selected; ?>><?php print $element['name']; ?></option>
+    <?php } 
+    endforeach; ?>
+</select>
+<?php
+$data = array();
+if (count($this->element) > 0) {
+    foreach ($this->element as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    ?>
+    <div id="singlecolumn">
+        <div id="activities">
+            <div id="tips">
+                <?php
+                if (count($data) > 0) {
+                    foreach ($data as $keys => $item1) {
+                        $keySplit = explode("::::", $keys);
+                        $key1 = $keySplit[0];
+                        ?>
+                        <h2><?php echo ucwords($key1); ?></h2>                    
+
+                        <div id="activities-scrollwrapper-<?php print strtolower($key1) ?>" class="activities-scrollwrapper"> 
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>SN</th>
+                                        <th>Image</th>
+                                        <th>Content</th>
+                                        <th>Order No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>   
+
+                                    <?php
+                                    $count = 1;
+
+                                    foreach ($item1 as $key => $item) {
+                                        $thumb = 'uploads' . DS . 'thumbnails' . DS . '40x40' . DS . 'images' . DS . ($item['file_name']);
+                                        switch (trim($thumb)) {
+                                            case '':
+                                            case NULL:
+                                            case (!is_file($this->basePath() . DS . $thumb)) :
+                                                $thumb = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                                                break;
+                                            default:
+                                                $thumb = $this->baseUrl() . '/uploads/thumbnails/40x40/images/' . rawurlencode($item['file_name']);
+                                        }
+                                        ?>                 
+                                        <tr>
+                                            <td><?php echo $count ?></td>
+                                            <td><input type ="hidden" name="content_id" value="<?php echo $item['content_id'] ?>"><img src = "<?php echo $thumb; ?>" alt ="no-img"/></td>
+                                            <td><?php echo $item['heading'] ?></td>
+                                            <td><?php echo $item['order_no'] ?></td>                                        
+                                        </tr>
+                                        <?php
+                                        $count++;
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+
+                            <div class="clear"></div>
+                        </div>
+                        <?php
+                    }
+                } else {
+                    echo "No Records(0)";
+                }
+                ?>
+
+            </div>
+        </div>
+    <?php } ?>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#search-element-type').change(function(){
+                var data = {'id':$(this).val()};  
+                $('#content').load(site.baseUrl + '/content/index/sort/format/html', data, function() {
+                });
+            });
+        });
+        /* $.ajax({ 
+                    url:'/content/index/sort/id/'+value+'/format/json',
+                    success: function(res){
+                        console.log(res.html);
+                        //$('#parent_id-select').html(res.html);                       
+                    }
+                });
+            });
+    $('#activity-search-btn').click(function() {
+            var data = {
+                'element_id' : $('#search-element-type').val(),
+                'location_id' : $('#search-location').val(),
+                'type' : $('#search-type').is(':checked') ? $('#search-type').val() : 'ELEMENT'
+            };
+        
+            $('#search-activity-result').load(site.baseUrl + '/package/index/search-activity/format/html', data, function() {
+            });
+        });*/
+   
+       
+    </script>
+
+

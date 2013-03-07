@@ -1,0 +1,136 @@
+<!--******************************************* ACTIVITIES STARTS *******************************-->
+<?php $session = Zend_Registry::get('defaultsession'); ?>
+<?php
+$data = array();
+if (count($this->element) > 0) {
+    foreach ($this->element as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    ?>
+    <div id="singlecolumn">
+        <div id="activities">
+            <div id="tips">
+                <a href="<?php printf('%s/%s',$this->siteUrl(),'holidays') ?>">Select your likes & find appropriate holidays</a></div>
+            <?php
+            if (count($data) > 0) {
+                foreach ($data as $keys => $item1) {
+                    $keySplit = explode("::::", $keys);
+                    $key1 = $keySplit[0];
+                    $elementCategoryId = $keySplit[1];
+                    ?>
+                    <h2><?php echo ucwords($key1); ?></h2>                     
+                    <div class="carousel-see-all">
+                        <?php
+                        $params = sprintf("%s", $elementCategoryId);
+                        $rijndael = new NepalAdvisor_Rijndael_Encrypt();
+                        $cipherQuery = $rijndael->encrypt($params);
+                        printf("<a href=\"%s/places/%s/view-all/%s\">View All</a>", $this->siteUrl(), urlencode(strtolower($key1)), $cipherQuery);
+                        ?>
+                    </div>
+                    <div id="activities-scrollwrapper-<?php print strtolower($key1) ?>" class="activities-scrollwrapper"> 
+                        <ul id="mycarousel-<?php print strtolower($key1) ?>" class="jcarousel-skin-tango jcarousel-places">
+                            <?php
+                            foreach ($item1 as $key => $item) {
+                                $selected = "";
+                                $session->userlikecontent[$this->id] = is_array($session->userlikecontent[$this->id]) ? $session->userlikecontent[$this->id] : (array) $session->userlikecontent[$this->id];
+                                if ($session->userlikecontent[$this->id]) {
+                                    if (array_key_exists($key, $session->userlikecontent[$this->id])) {
+                                        $selected = "content-liked";
+                                    }
+                                }
+                                $thumb = 'uploads' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . ($item['file_name']);
+                                switch (trim($thumb)) {
+                                    case '':
+                                    case NULL:
+                                    case (!is_file($this->basePath() . DS . $thumb)) :
+                                        $thumb = sprintf("%s/images/no-image/120x120.jpg", $this->baseUrl());
+                                        break;
+                                    default:
+                                        $thumb = $this->baseUrl() . '/uploads/thumbnails/120x120/images/' . rawurlencode($item['file_name']);
+                                }
+                                ?>
+
+                                <li id="jcarousel-content-item-<?php print $key ?>" class="jcarousel-content-item activities-item <?php echo $selected; ?>">
+                                    <div class="slide">
+                                        <?php
+                                        /**
+                                         * append heading words with -
+                                         */
+                                        $headingParts = explode(' ', trim(strtolower($item['heading'])));
+                                        $parts = array();
+                                        // the looping is done to prevent multiple - to occur is more than one space
+                                        // is in between two words
+                                        foreach ($headingParts as $part) {
+                                            if ($part) {
+                                                $parts[] = $part;
+                                            }
+                                        }
+                                        $title = implode('-', $parts);
+
+                                        $id = $key;
+                                        $catId = $item['element_category_id'];
+                                        $cipher = $this->rijndael->encrypt($id . '-' . $catId);
+                                        $detailUrl = sprintf("%s/places/%s/%s.html", $this->siteUrl(), $title, $cipher);
+                                        $likeUrl = sprintf("%s/places/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                                        $likeBtn = 'themes/default/themeimages/ic-like.png';
+                                        $likeAltText = 'Like';
+                                        $likeClass = 'ln-like';
+                                        $likeImageClass = 'ln-img-like';
+                                        if ($session->userlikecontent[$this->id]) {
+                                            if (array_key_exists($key, $session->userlikecontent[$this->id])) {
+                                                $likeUrl = sprintf("%s/places/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                                                $likeClass = 'ln-unlike';
+                                                $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                                                $likeAltText = 'Unlike';
+                                                $likeImageClass = 'ln-img-unlike';
+                                            }
+                                        }
+                                        ?>
+                                        <a class="img-ln <?php echo $likeClass; ?>" href="<?php print $likeUrl; ?>">
+                                            <img src="<?php echo $thumb; ?>" title ="<?php echo $item['one_line_desc'] ?>" alt="<?php echo $item['heading'] ?>" width="120" height="120" />
+                                        </a>
+                                        <span class="snipit">
+                                            <a href="javascript:void(0);" class="content-infopop hover-icon nobrdright"><img src="<?php echo $this->theme('themes/default/themeimages/ic-info.png') ?>" alt="Info" class="hover-icon-info" border="0" /></a> 
+                                            <a href="<?php print $detailUrl; ?>" class="hover-icon-more">more</a>
+                                            <a href="<?php print $likeUrl; ?>" class="hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>"><img src="<?php echo $this->theme($likeBtn) ?>" alt="<?php echo $likeAltText; ?>" class="hover-icon-like" border="0" /></a>
+                                        </span>
+                                    </div>
+                                    <div class="slide-caption">
+                                        <span class="holiday-caption-title"><a href="<?php print $detailUrl; ?>"><?php echo $item['heading'] ?></a></span> 
+                                        <br /><span class="holiday-caption-desc"><?php echo $item['one_line_desc']; ?></span>
+                                    </div>                                            
+                                    <input type ="hidden" class="content-info-id" value ="<?php echo $key ?>"/>    
+                                    <div class="content-detail-view" id="detail-view-<?php echo $key; ?>" style="display:none">
+                                        <h2><?php echo $item['heading']; ?></h2>
+                                        <?php echo '<p>' . $item['three_line_desc'] . '</p>'; ?>
+                                        <a href="<?php print $detailUrl; ?>" class="link-button">Details</a>
+
+                                    </div>
+                                </li>
+                            <?php }
+                            ?>
+                        </ul>
+                        <div class="clear"></div>
+                    </div>
+                    <?php
+                }
+            } else {
+                echo "No Records(0)";
+            }
+            ?>
+
+        </div>
+    </div>
+<?php } ?>
+
+<!--******************************************* ACTIVITIES ENDS *******************************-->      
+
+<!-- TOP SELLING HOLIDAYS CAROUSIL SCRIPT -->
+<script type="text/javascript">
+    $(document).ready(function() {        
+        $('ul.jcarousel-places , #mycarousel1').jcarousel({
+            //start: 3
+        });  
+    });
+</script>
+

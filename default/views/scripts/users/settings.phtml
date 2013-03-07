@@ -1,0 +1,25 @@
+<div class="settings-form">
+            <?php echo $this->partial("_flashMessages.phtml"); ?>
+    <fieldset>
+        <legend><h1>Edit Your Account</h1></legend>
+    <div class="element">
+        <div class="form-item"><div class="Label"><label class="optional" for="full_name"><strong>Email:</strong></label>
+         <strong><?php echo Zend_Auth::getInstance()->getIdentity()->email; ?></strong>
+        </div>
+        </div>
+            <form action="<?php echo $this->url(); ?>" method="post">
+                <?php $form = $this->form->getElements(); ?>
+                <?php echo $form["full_name"]; ?>
+                <?php echo $form["username"]; ?>
+                <?php echo $form["password"]; ?>
+                <?php echo $form["address"]; ?>
+                <?php echo $form["country_id"]; ?>
+                <div class="form-item">
+                    <label>&nbsp;</label>
+                    <?php echo $form["save"]; ?>
+                </div>
+            </form>
+        </div>
+    <?php echo $this->headScript()->appendFile($this->baseUrl()."/js/default/check-email.js"); ?>
+    </fieldset>
+</div>

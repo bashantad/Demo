@@ -1,0 +1,10 @@
+<?php
+if('Y'==$this->approved){
+    echo "Your account has been activated";
+}
+elseif(!$this->approved){
+    echo "<h1>Sign Up Successful!</h1>Your activation link has been sent to email you specified. Please check your email and activate your account.";
+}
+?>
+
+<h3> Welcome <?php echo  isset($this->user->full_name)?$this->user->full_name:$this->user->email; ?></h3>

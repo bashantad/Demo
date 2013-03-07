@@ -1,0 +1,21 @@
+<?php if ($this->treeHtml) : ?>
+    <div class="tree-view">
+        <?php print $this->treeHtml; ?>
+    </div>
+
+    <?php
+    $this->headLink()->appendStylesheet(sprintf("%s/css/tree-hierarchy.css", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/index.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/event.js", $this->baseUrl()));
+    ?>
+<?php endif; ?>
+
+<?php // Dynamic view content renders here; ?>
+<div class="tree-content">
+    <?php echo $this->form; ?>
+    <div class="hidden">
+        <input type="hidden" name="action" value="<?php print $this->action; ?>" />
+    </div>
+</div>
+<div class="clear"></div>
+<input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />

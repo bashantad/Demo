@@ -1,0 +1,16 @@
+<div class="inspirations-comments-elephant-bath-content">
+    <?php if($this->comments){
+        foreach($this->comments as $comment): ?>
+    <div class="inspirations-comments-elephant-bath-wrapper">
+        <h2><?php echo $comment->title; ?> </h2>
+        <?php echo $comment->description; ?>
+        <div class="commentor">
+            <img src="<?php echo $this->theme('images/commentor-image.jpg') ?>" align="left" />
+            <?php echo ($comment->full_name)?$comment->full_name:$comment->email; ?>   
+            <div class="clear"></div>
+        </div>
+    </div>
+    <?php
+    endforeach;
+    } ?>
+</div>

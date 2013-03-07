@@ -1,0 +1,280 @@
+<?php
+if ($this->datas['search']):
+    foreach ($this->datas['search'] as $data):
+        if (isset($data->package_id)) {
+            ?>
+            <div class="listitems" id ="holiday-<?php echo $data->package_id ?>">
+                <div class="listitemsright">
+                    <?php
+                    $title = trim($data->title);
+                    $cipher = $this->rijndael->encrypt($data->package_id);
+                    $packageUrl = "{$this->siteUrl()}/holidays/" . urlencode($title) . "/{$cipher}.html";
+
+                    $likeUrl = sprintf("%s/holidays/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                    $likeClass = 'pk-like';
+                    $likeImageClass = 'pk-img-like';
+                    $likeBtn = 'themes/default/themeimages/ic-like.png';
+                    $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+                    $pklikeAltText = 'Like';
+                    $pklikeWords = 'Like';
+                    $likeAltText = 'Like';
+
+                    if (isset($session->userlikedpackage[$data->package_id]) && $session->userlikedpackage[$data->package_id] == "package-liked") {
+                        $likeUrl = sprintf("%s/holidays/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                        $likeClass = 'pk-unlike';
+                        $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                        $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+                        $pklikeAltText = 'Unlike';
+                        $pklikeWords = 'Unlike';
+                        $likeImageClass = 'pk-img-unlike';
+                    }
+                    ?>
+                    <div class="title">
+                        <h2><a href="<?php echo $packageUrl; ?>"><?php print $title ?></a></h2>
+                        <?php if ($data->fixed_departure == 'Y'): ?>
+                            <span class ="fixed-departure" style="position: relative;">
+                                <input class="package-id" type="hidden" value="<?php echo $cipher ?>">
+                                <?php print "<a href='javascript:void(0);' class='fixed-departure-dates'>Click for <b>Fixed Departure</b> Date</a>" ?>
+                                <div id ="fixed-departure-date-list-<?php echo $data->package_id ?>" class="fixed-dates-list" style="display:none;"></div>
+                            </span>
+                        <?php endif; ?>
+
+                        <div class="clear"></div>
+                        <?php foreach ($this->offers as $offer): ?>
+                            <?php if ($offer->package_id == $data->package_id): ?>
+                                <span class ="offer-type"> 
+                                    <b>Offer: </b><?php echo $offer->{'Value Type'} == 'VALUE' ? $offer->{'Offer Type'} . " ( $" . $offer->{'Value'} . " Discount )" : $offer->{'Offer Type'} . " ( " . $offer->{'Value'} . "% Discount )" ?>
+                                </span>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="desc word-limiter-text-trimmed">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($data->description), 450);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                            <a class="read-more" href="<?php print $packageUrl; ?>">more...</a>                        
+                        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+                        <?php print $data->description; ?><br />
+                        <a class="read-less" href="javascript:void(0);">...less</a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="listitemsleft">
+                    <?php
+                    $filename = $data->file_name;
+                    $thumbUrl = sprintf("%s/package/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($filename));
+                    $thumbPath = "package" . DS . 'thumbnails' . DS . '190x105' . DS . 'images' . DS . $filename;
+
+                    if (!is_file($this->basePath() . DS . $thumbPath)) {
+                        $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                    }
+                    ?>
+                    <div class="thmbimg">
+                        <a href="<?php echo $packageUrl; ?>">
+                            <img src="<?php echo $thumbUrl; ?>" alt="" width="190" height="105"/>
+                        </a>
+                    </div>
+                    <div class="list-price">Duration: <?php echo $data->no_of_days ?> Days</div>
+                    <div class="list-price">Price: $<?php echo number_format($data->total_cost, 2) ?></div>
+                    <div class="list-ratings">Rating:
+                        <span class='fivestar-ratings'>
+                            <?php
+                            echo $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $data->overall_rank, 'type' => 'package_rating', 'table' => '', 'id' => $data->package_id)));
+                            ?>
+                        </span>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="likes-bar">
+                    <a class="link-button hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>" href="<?php print $likeUrl; ?>">
+                        <span class="like-phrase"><?php echo $pklikeWords ?></span>
+                        <img border="0" alt="<?php echo $pklikeAltText; ?>" src="<?php echo $this->theme($pkLikeBtn) ?>">                       
+                    </a>
+                </div>
+                <?php
+                $bookUrl = sprintf("%s/serviceprovider/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher);
+                $cip = $this->rijndael->encrypt('package-' . $data->package_id);
+                $bookUrl = sprintf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cip);
+                ?>
+                <div class="likes-bar"><a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a></div>
+                <div class="clear"></div>
+            </div>
+            <?php
+        }
+    endforeach;
+else:
+    ?>
+    <?php if ($this->sort): ?>
+        <div class="rec-holiday-title listitems">
+            <h2>Recommended Holidays</h2>
+            <input type="hidden" id="already-clicked" value="1" >
+        </div>
+    <?php endif; ?>
+    <?php foreach ($this->datas['recommended'] as $data): ?>
+        <div class="listitems" id ="holiday-<?php echo $data['package_id'] ?>">
+            <div class="listitemsright">
+                <?php
+                $title = trim($data['title']);
+                $cipher = $this->rijndael->encrypt($data['package_id']);
+                $packageUrl = "{$this->siteUrl()}/holidays/" . urlencode($title) . "/{$cipher}.html";
+
+                $likeUrl = sprintf("%s/holidays/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                $likeClass = 'pk-like';
+                $likeImageClass = 'pk-img-like';
+                $likeBtn = 'themes/default/themeimages/ic-like.png';
+                $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+                $pklikeAltText = 'Like';
+                $pklikeWords = 'Like';
+                $likeAltText = 'Like';
+                if (isset($session->userlikedpackage[$data['package_id']]) && $session->userlikedpackage[$data['package_id']] == "package-liked") {
+                    $likeUrl = sprintf("%s/holidays/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                    $likeClass = 'pk-unlike';
+                    $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                    $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+                    $pklikeAltText = 'Unlike';
+                    $pklikeWords = 'Unlike';
+                    $likeImageClass = 'pk-img-unlike';
+                }
+                ?>
+                <div class="title">
+                    <h2><a href="<?php echo $packageUrl; ?>"><?php print $title ?></a></h2>
+                    <?php if ($data['fixed_departure'] == 'Y'): ?>
+                        <span class ="fixed-departure" style="position: relative;">
+                            <input class="package-id" type="hidden" value="<?php echo $cipher ?>">
+                            <?php print "<a href='javascript:void(0);' class='fixed-departure-dates'>Click for <b>Fixed Departure</b> Date</a>" ?>
+                            <div id ="fixed-departure-date-list-<?php echo $data['package_id'] ?>" class="fixed-dates-list" style="display:none;"></div>
+                        </span>
+                    <?php endif; ?>
+                    <div class="clear"></div>
+                    <?php foreach ($this->offers as $offer): ?>
+                        <?php if ($offer->package_id == $data['package_id']): ?>
+                            <span class ="offer-type"> 
+                                <b>Offer: </b><?php echo $offer->{'Value Type'} == 'VALUE' ? $offer->{'Offer Type'} . " ( $" . $offer->{'Value'} . " Discount )" : $offer->{'Offer Type'} . " ( " . $offer->{'Value'} . "% Discount )" ?>
+                            </span>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+                <div class="desc word-limiter-text-trimmed">
+                    <?php
+                    $outputText = $this->wordLimiter(strip_tags($data['description']), 450);
+                    print $outputText['text'];
+                    ?><br />
+                    <?php if ($outputText['isTrimmed']) : ?>
+                        <a class="read-more" href="<?php print $packageUrl; ?>">more...</a>                        
+                    <?php endif; ?>
+                </div>
+                <div class="desc word-limiter-text-all" style="display:none;">
+                    <?php print $data['description']; ?><br />
+                    <a class="read-less" href="javascript:void(0);">...less</a>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="listitemsleft">
+                <?php
+                $filename = $data['file_name'];
+                $thumbUrl = sprintf("%s/package/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($filename));
+                $thumbPath = "package" . DS . 'thumbnails' . DS . '190x105' . DS . 'images' . DS . $filename;
+
+                if (!is_file($this->basePath() . DS . $thumbPath)) {
+                    $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                }
+                ?>
+
+                <div class="thmbimg">
+                    <a href="<?php echo $packageUrl; ?>">
+                        <img alt="" width="190" height="105" src="<?php echo $thumbUrl ?>" />
+                    </a>
+                </div>
+                <div class="list-price">Duration: <?php print $data['no_of_days'] ?> Days</div>
+                <div class="list-price">Price: $<?php print number_format($data['total_cost'], 2) ?></div>
+                <div class="list-ratings">Rating:
+                    <span class='fivestar-ratings'>
+                        <?php
+                        echo $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $data['overall_rank'], 'type' => 'package_rating', 'table' => '', 'id' => $data['package_id'])));
+                        ?>
+                    </span>
+                </div>
+            </div>
+            <div class="clear"></div>
+            <div class="likes-bar">
+                <a class="link-button hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>" href="<?php print $likeUrl; ?>">
+                    <span class="like-phrase"><?php echo $pklikeWords ?></span>
+                    <img border="0" alt="<?php echo $pklikeAltText; ?>" src="<?php echo $this->theme($pkLikeBtn) ?>">                       
+                </a>
+            </div>
+            <?php
+            $bookUrl = sprintf("%s/serviceprovider/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher);
+            $cip = $this->rijndael->encrypt('package-' . $data['package_id']);
+            $bookUrl = sprintf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cip);
+            ?>
+            <div class="likes-bar"><a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a></div>
+            <div class="clear"></div>
+        </div>
+        <?php
+    endforeach;
+endif;
+?>
+
+<script type="text/javascript">	
+    $(function() {
+        $('.close-fixed').live('click',function(e) {
+            $(this).parent().css('display','none');
+        });
+        
+        $('.fixed-departure-dates').live('click',function() {
+            var $this = $(this);
+            var pid = $this.parent().find('.package-id').val();
+            var list = $this.parent().find('.fixed-dates-list');
+            $.ajax({
+                url:'holidays/getdeparturedates/',
+                data: 'id='+pid,
+                success: function(res){
+                    list.html(res);
+                    list.css('display','block');
+                }
+            });
+        });
+        
+        $('.read-more').live('click', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            var $trimmedHtmlWrapper = $(this).parents('.word-limiter-text-trimmed:first');
+            //            $trimmedHtmlWrapper.hide(function() {
+            //                $trimmedHtmlWrapper.next('.word-limiter-text-all').show();
+            //            });
+            $trimmedHtmlWrapper.hide();
+            $trimmedHtmlWrapper.next('.word-limiter-text-all').show();
+        });
+        $('.read-less').live('click', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            var $trimmedHtmlWrapper = $(this).parents('.word-limiter-text-all:first');
+            //            $trimmedHtmlWrapper.hide(function() {
+            //                $trimmedHtmlWrapper.prev('.word-limiter-text-trimmed').show();
+            //            });
+            $trimmedHtmlWrapper.hide();
+            $trimmedHtmlWrapper.prev('.word-limiter-text-trimmed').show();
+        });
+    });
+</script>
+
+<!-- Five Star Rating -->
+<?php /*
+  <script type="text/javascript" src="<?php echo $this->theme("js/fivestar/documentation/chili/jquery.chili-2.0.js"); ?>"></script>
+  <!--//documentation/chili-toolbar/jquery.chili-toolbar.pack.js//-->
+  <script type="text/javascript">try{ChiliBook.recipeFolder="<?php echo $this->theme("js/fivestar/documentation/chili/"); ?>"}catch(e){}</script>
+  <!--// plugin-specific resources //-->
+ */
+?>
+<script type="text/javascript" src="<?php echo $this->theme("js/fivestar/jquery.MetaData.js"); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->theme("js/fivestar/jquery.rating.js"); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->theme("js/fivestar.js"); ?>"></script>
+<!-- Five Star Rating End -->
+
+<?php $this->headScript()->appendFile('/js/utility.js'); ?>

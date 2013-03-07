@@ -1,0 +1,325 @@
+<?php
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap.min.css');
+//$this->headLink()->appendStylesheet('/css/uploads/style.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap-responsive.min.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap-image-gallery.min.css');
+$this->headLink()->appendStylesheet('/css/uploads/jquery.fileupload-ui.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap.min.css');
+?>
+
+<?php if ($this->treeHtml) : ?>
+    <div class="tree-view">
+        <?php print $this->treeHtml; ?>
+    </div>
+    <input type = "hidden" id="content_id" value="<?php print $this->id; ?>" name="content_id" />
+    <input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />
+    <?php
+    $this->headLink()->appendStylesheet(sprintf("%s/css/tree-hierarchy.css", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/index.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/event.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ckeditor/ckeditor.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ckeditor/config.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/content-search.js", $this->baseUrl()));
+    ?>
+<?php endif; ?>
+    
+<style type="text/css">
+    .video-wrapper {
+        float: left;
+        margin-right: 20px;
+    }
+    .embed-code-wrapper {
+        float: left;
+    }
+    #embed-code {
+        width: 100%;
+        border: 1px solid #ccc;
+    }
+    #separator {
+        width: 100%;
+        border-bottom: 1px solid #eee;
+        margin-top: 50px;
+    }
+    #embed-submit-wrapper {
+        margin-top: 7px;
+    }
+    textarea.embed-code {
+        width: 400px;
+    }
+    #video-upload iframe {
+        width: 200px;
+        height: 112px;
+    }
+</style>    
+<div class="tree-content">
+    <div class="container">
+        <div class="page-header">
+            <h1>Upload Images/Video For "<?php echo $this->heading; ?>"</h1>
+        </div>
+        <div>
+            <h2>Youtube Video</h2>
+            <form id="video-upload" action='<?php echo $_SERVER['REQUEST_URI'] ?>' method="POST" enctype="multipart/form-data">
+                <?php
+                $vHtml =    "<div class=\"vmedia\"> \n"
+                                ."<input type=\"hidden\" name=\"content_file_id[%s]\" value=\"%s\" /> \n"
+                                ."<div class=\"video-wrapper\">%s</div> \n"
+                                ."<div class=\"embed-code-wrapper\"> \n"
+                                .   "<label>Embed Code: </label> \n"
+                                .   "<textarea rows=\"3\" cols=\"15\" name=\"embed_code[%s]\" class=\"embed-code form-textarea\">%s</textarea> \n"
+                                ."</div> \n"
+                                ."<div class=\"clear\"></div> \n"
+                            ."</div> \n";
+                ?>
+                <?php 
+                if($this->vMedia) {
+                    foreach($this->vMedia as $key=>$media) {
+                        printf($vHtml, $key, $media->content_file_id, $media->embed_code, $key, $media->embed_code);
+                        /*
+                        <div class="vmedia">
+                            <input type="hidden" name="content_file_id[<?php print $key; ?>]" value="<?php print $media->content_file_id ?>" />
+                            <div class="video-wrapper"><?php print $media->embed_code ?></div>
+                            <div class="embed-code-wrapper">
+                                <label>Embed Code: </label>
+                                <textarea rows="3" cols="15" name="embed_code[<?php print $key; ?>]" class="embed-code form-textarea"><?php print $media->embed_code ?></textarea>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                         */
+                    }
+                }
+                else {
+                    printf($vHtml, 0, '', '', 0, '');
+                }
+                ?>
+                <div id="embed-submit-wrapper">
+                    <input type="hidden" name="is_video" value="1" />
+                    <input class="btn" id="embed-btn" type="submit" name="embed" value="Submit" />
+                </div>
+            </form>
+        </div>
+        <div id="separator"></div>
+        <br>
+        <div>
+            <h2>Images</h2>
+        </div>
+        <!-- The file upload form used as target for the file upload widget -->
+        <form id="fileupload" action='<?php echo "/content/index/render/id/" . $this->id ?>' method="POST" enctype="multipart/form-data">
+            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+            <div class="row fileupload-buttonbar">
+                <div class="span7">
+                    <!-- The fileinput-button span is used to style the file input field as button -->
+                    <span class="btn btn-success fileinput-button">
+                        <span><i class="icon-plus icon-white"></i> Add files...</span>
+                        <input type="file" name="files[]" multiple>
+                    </span>
+                    <button type="submit" class="btn btn-primary start">
+                        <i class="icon-upload icon-white"></i> Start upload
+                    </button>
+                    <button type="reset" class="btn btn-warning cancel">
+                        <i class="icon-ban-circle icon-white"></i> Cancel upload
+                    </button>
+                    <button type="button" class="btn btn-danger delete">
+                        <i class="icon-trash icon-white"></i> Delete
+                    </button>               
+                    <input type="checkbox" class="toggle">
+                    <button type="button" class="btn btn-watermark watemark">
+                        <i class="icon-watermark icon-white"></i> Copyright
+                    </button>             
+                    <input type="checkbox" onclick="toggleChecked(this.checked)" value ="1" class="copyright-toggle">
+                </div>
+                <div class="span5">
+                    <!-- The global progress bar -->
+                    <div class="progress progress-success progress-striped active fade">
+                        <div class="bar" style="width:0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- The loading indicator is shown during image processing -->
+            <div class="fileupload-loading"></div>
+            <br>
+            <!-- The table listing the files available for upload/download -->
+            <table class="table table-striped">
+                <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery">
+                    <tr>
+                        <th></th>
+                        <th>Original File Name</th>
+                        <th>Size</th>
+                        <th>Title</th>
+                        <th>Alt Tag</th>
+                        <th>Copyright</th>
+                        <th colspan ="3"></th>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+        <br>
+    </div>
+    <!-- modal-gallery is the modal dialog used for the image gallery -->
+    <div id="modal-gallery" class="modal modal-gallery hide fade">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">&times;</a>
+            <h3 class="modal-title"></h3>
+        </div>
+        <div class="modal-body"><div class="modal-image"></div></div>
+        <div class="modal-footer">
+            <a class="btn btn-primary modal-next">Next <i class="icon-arrow-right icon-white"></i></a>
+            <a class="btn btn-info modal-prev"><i class="icon-arrow-left icon-white"></i> Previous</a>
+            <a class="btn btn-success modal-play modal-slideshow" data-slideshow="5000"><i class="icon-play icon-white"></i> Slideshow</a>
+            <a class="btn modal-download" target="_blank"><i class="icon-download"></i> Download</a>
+        </div>
+    </div>
+    <!-- The template to display files available for upload -->
+    <script id="template-upload" type="text/x-tmpl">
+        {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-upload fade">
+            <td class="preview"><span class="fade"></span></td>
+            <td class="name"><input type="text" name="title[{%=file.name%}]" id="title" value="{%=file.name%}"></td>
+            <td class="size">{%=o.formatFileSize(file.size)%}</td>
+            <td class="description"><input type="hidden" name ="content_id" value ="<?php echo $this->id ?>"><textarea name ="description[{%=file.name%}]" id="description" rows="2" cols="20"></textarea></td>
+            <td class="caption"><input type="hidden" name ="upload_url" value="<?php echo $this->uploadPath; ?>"><textarea name ="caption[{%=file.name%}]" id="caption" rows="2" cols="20"></textarea></td>
+
+
+            {% if (file.error) { %}
+            <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
+            {% } else if (o.files.valid && !i) { %}
+            <td>
+                <div class="progress progress-success progress-striped active"><div class="bar" style="width:0%;"></div></div>
+            </td>
+            <td class="start">{% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary">
+                    <i class="icon-upload icon-white"></i> {%=locale.fileupload.start%}
+                </button>
+                {% } %}</td>
+            {% } else { %}
+            <td colspan="2"></td>
+            {% } %}
+            <td class="cancel">{% if (!i) { %}
+                <button class="btn btn-warning">
+                    <i class="icon-ban-circle icon-white"></i> {%=locale.fileupload.cancel%}
+                </button>
+                {% } %}</td>
+        </tr>
+        {% } %}
+    </script>
+    <!-- The template to display files available for download -->
+    <script id="template-download" type="text/x-tmpl">
+        {% for (var i=0, file; file=o.files[i]; i++) { %}
+        <tr class="template-download fade">
+            {% if (file.error) { %}
+            <td ></td>
+            <td class="name">{%=file.name%}</td>
+            <td class="size">{%=o.formatFileSize(file.size)%}</td>            
+            <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
+            {% } else { %}
+            <td class="preview">{% if (file.thumbnails_url) { %}
+                <a href="{%=file.url%}" title="{%=file.name%}" rel="gallery" download="{%=file.name%}"><img src="{%=file.thumbnails_url%}"></a><br/>
+                <a href="{%=file.url%}" title="{%=file.name%}" rel="{%=file.thumbnails_url&&'gallery'%}" download="{%=file.name%}">{%=file.renamefile%}</a>
+                {% } %}</td>
+            <td class="name">
+                {%=file.original_file_name?file.original_file_name:file.name%}
+               <!-- <input type="text" name="title[{%=file.name%}]" value="{%=file.title%}">-->
+            </td>
+            <td class="size">{%=o.formatFileSize(file.size)%}</td>            
+            <td class="description" style="width:170px;">{%=file.description%}<!--<textarea name ="description[{%=file.name%}]" rows="2" cols="20">{%=file.description%}--></textarea></td>
+            <td class="caption" style="width:170px;">{%=file.caption%}<!--<textarea name ="caption[{%=file.name%}]" rows="2" cols="20">{%=file.caption%}--></textarea></td>            
+            {% } %}
+            <td style="width:50px;"><input type="checkbox" name="watermark"  {%=file.copyright%} value="1" id="watermark-{%=file.id%}" class="watermark"></td>
+            <td class="delete">
+                <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+                    <i class="icon-trash icon-white"></i> {%=locale.fileupload.destroy%}
+                </button>
+                <input type="checkbox" name="delete" value="1">
+                <input type="hidden" value ="<?php echo $this->id ?>">
+            </td>
+        </tr>
+        {% } %}
+    </script>
+</div>
+<?php
+$front = Zend_Controller_Front::getInstance()->getRequest();
+$module = $front->getModuleName();
+$controller = $front->getControllerName();
+$actionPath = '/' . $module . '/' . $controller . '/';
+?>
+<input class="action-path" type="hidden" name="action_path" value="<?php echo $actionPath; ?>" />
+<?php
+$this->headScript()->appendFile('/js/uploads/vendor/jquery.ui.widget.js');
+$this->headScript()->appendFile("/js/uploads/tmpl.min.js");
+$this->headScript()->appendFile("/js/uploads/load-image.min.js");
+$this->headScript()->appendFile("/js/uploads/canvas-to-blob.min.js");
+$this->headScript()->appendFile("/js/uploads/bootstrap.min.js");
+$this->headScript()->appendFile("/js/uploads/bootstrap-image-gallery.min.js");
+$this->headScript()->appendFile("/js/uploads/jquery.iframe-transport.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload-ip.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload-ui.js");
+$this->headScript()->appendFile("/js/uploads/locale.js");
+$this->headScript()->appendFile("/js/uploads/main.js");
+?>
+
+<script type="text/javascript">
+
+    function toggleChecked(status) {
+        $(".watermark").each( function() {
+            $(this).attr("checked",status);
+        })
+    } 
+        
+    $(document).ready(function() {
+        var treeOffset = $('.tree-view #h-list').offset();
+        var termOffset = $('.tree-view #h-list a.active').offset();
+        var top = termOffset.top-treeOffset.top;
+        $('.tree-view #h-list').animate({
+            scrollTop: top-2},
+        'slow'); 
+    
+        $('input.watermark').live("click", function(){
+            var $this = $(this);
+            var actionPath = $('.action-path').val();
+            var id = $(this).attr('id');   
+            var idParts = id.split('-');
+            var cid = idParts[1];            
+            $.ajax({
+                type: 'POST',
+                url: site.baseUrl + actionPath + 'watermark/id/'+cid+'/format/json',
+                dataType: 'json',
+                success: function(res){                    
+                    if(res.msg == 'Y'){
+                        $("#"+id).attr('checked');
+                    }else{
+                        $("#"+id).removeAttr('checked');
+                    }
+                }
+
+            });
+
+        });
+
+        $('.btn-watermark').click(function(){
+            var actionPath = $('.action-path').val();
+            var chkArray = new Array();
+            $(".watermark:checked").each(function(){
+                var id = $(this).attr('id');   
+                var idParts = id.split('-');
+                var cid = idParts[1];   
+                chkArray.push(cid);
+            });
+            var ntchkArray = new Array();
+            $(".watermark:not(:checked)").each(function(){
+                var id = $(this).attr('id');   
+                var idParts = id.split('-');
+                var cid = idParts[1];   
+                ntchkArray.push(cid);
+            });
+            $.ajax({
+                type: 'POST',
+                url: site.baseUrl + actionPath + 'watermark/format/json',
+                dataType: 'json',
+                data: {chkId: chkArray,ntchkId:ntchkArray},                     
+                success: function(res){                    
+                    console.log('success');
+                }           
+            }); 
+        });
+    });
+</script>

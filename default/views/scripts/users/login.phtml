@@ -1,0 +1,32 @@
+<?php $this->headTitle('Login'); ?>
+<div class="login-form">   
+    <fieldset><legend><h2>Sign In with Nepaladvisor</h2></legend>
+        <?php print $this->partial('_flashMessages.phtml'); ?>
+        <?php
+        $form = $this->form->getElements();
+        ?>
+        <form action="<?php echo $this->siteUrl() . '/users'; ?>" method="post">
+            <?php echo $form["email"]; ?>
+            <?php echo $form["request_uri"]; ?>
+            <?php echo $form["password"]; ?>
+            <?php echo $form["login"]; ?>
+        </form>
+    
+        <a href="<?php echo $this->siteUrl().'/users/register'; ?>">Sign up</a> | 
+        <a href="<?php echo $this->siteUrl() . '/users/forgot-password'; ?>">Forgot Your Password?</a> 
+        <div class="clear"></div>
+        <div class="left-floater">Or Login with</div>
+        <div class="left-floater">
+            <form id="openid_form" method="get" action="<?php echo $this->siteUrl() . '/users/login'; ?>">
+                <div>
+                    <input type="hidden" name="action" value="verify" />
+                    <input type="submit" name="openid_identifier" value="https://www.google.com/accounts/o8/id" class="btn-img-google" />
+                    <input type="submit" name="openid_identifier" value="http://me.yahoo.com" class="btn-img-yahoo" />
+                    <input type="submit" name="openid_identifier" value="https://www.facebook.com" class="btn-img-facebook"/>
+                    <input type="submit" name="openid_identifier" value="https://www.twitter.com" class="btn-img-twitter" />
+                </div>
+            </form>
+        </div>
+        <div class="clear">
+    </fieldset>
+</div>

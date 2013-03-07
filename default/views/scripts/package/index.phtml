@@ -1,0 +1,144 @@
+<style>
+    .package-element{
+        float:right;
+    }
+    .booknow{
+        float:right;
+    } 
+</style>
+<div id="leftmaincol">
+    <?php
+    $customArray = array();
+    if ($this->package) {
+        ?>
+        <h2> Your Custom Packages </h2>
+        <?php
+        foreach ($this->package as $row):
+            $params = sprintf("event_id=%s&encryption=%s", $row->event_id, rand());
+            array_push($customArray, $row->package_id);
+            $cipherQuery = $this->rijndael->encrypt($params);
+            ?> 
+            <div id="listitemswrapper">
+                <div class="listitems">
+                    <div class="listitemsright">
+                        <div class="title"><a href="<?php echo $this->siteUrl() . "/default/package/detail/?q=$cipherQuery"; ?>"><h2><?php echo $row->title; ?></h2></a></div>
+                        <div class="desc word-limiter-text-trimmed">
+                            <?php
+                            $outputText = $this->wordLimiter(strip_tags($row->description), 450);
+                            print $outputText['text'];
+                            ?><br />
+                            <?php if ($outputText['isTrimmed']) : ?>
+                                <a class="read-more" href="<?php printf("%s/holidays/%s/%s.html", $this->siteUrl(), urlencode($row->title), $this->rijndael->encrypt($row->package_id)); ?>">more...</a>                        
+                            <?php endif; ?>
+                        </div>
+                        <div class="desc word-limiter-text-all" style="display:none;">
+                        <?php print $row->description; ?><br />
+                            <a class="read-less" href="javascript:void(0);">...less</a>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="listitemsleft">
+                        <div class="thmbimg">
+                            <?php
+                            $filename = $row->file_name;
+                            $thumbUrl = sprintf("%s/package/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($filename));
+                            $thumbPath = "package" . DS . 'thumbnails' . DS . '190x105' . DS . 'images' . DS . $filename;
+
+                            if (!is_file($this->basePath() . DS . $thumbPath)) {
+                                $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                            }
+                            
+                            ?>
+                            <a href="<?php echo $this->siteUrl() . "/default/package/detail/?q=$cipherQuery"; ?>"> 
+                                <img src="<?php echo $thumbUrl; ?>" />
+                            </a>
+                        </div>
+                        <div class="list-price">Start Date: <?php echo date('jS M, Y', strtotime($row->start_dt)); ?></div>
+                        <div class="list-price">End Date: <?php echo date('jS M, Y', strtotime($row->end_dt)); ?></div>
+                        <div class="list-ratings">Cost: $<?php echo number_format($row->total_price, 2); ?></div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="edit-trip-wrapper">
+                        <?php if($row->payment_status) : ?>
+                        <?php
+                        $stat = strtolower($row->payment_status);
+                        ?>
+                        <span class="package-element book-status-<?php print $stat; ?>"><?php print ucwords($stat); ?></span>
+                        <?php else: ?>
+                        <span class="package-element">
+                            <a class="back-button"  href="<?php echo $this->siteUrl() . "/default/package/edit/?q=$cipherQuery"; ?>">Edit your trip</a>
+                        </span>
+                        <span class="package-element">
+                            <?php $cip = $this->rijndael->encrypt('event-'.$row->event_id); ?>
+                            <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/'.$cip.'.html'; ?>" >Book</a>
+                        </span>
+                        <?php endif; ?>
+                        <div class="clear"></div>
+                    </div>
+
+                </div>
+            </div>
+            <div>&nbsp;</div>
+            <?php
+        endforeach;
+    } else {
+        echo "<h2>You don't have any custom packages.<h2>";
+    }
+    ?>
+</div>
+<div id="rightpanel">
+    <div class="rightcontentbox">
+        <h2>Suggested Holidays</h2>
+        <?php
+        if ($this->relatedServices) {
+            foreach ($this->relatedServices as $dtl) {
+                if (in_array($dtl['package_id'], $customArray)) {
+                    continue;
+                }
+                $title = trim($dtl['title']);
+                $cipher = $this->rijndael->encrypt($dtl['package_id']);
+                $packageDetailUrl = $this->siteUrl() . '/holidays/' . urlencode($title) . '/' . $cipher . '.html';
+                ?>
+                <!--<h3><a href="<?php echo $this->siteUrl() . "/default/serviceprovider/detail/?q=$cipherQuery"; ?>"><?php echo ucwords(trim($dtl->name)); ?></a></h3>-->
+                <div class="otherhotelslistwrapper">
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $filename = $dtl['file_name'];
+                        $thumbUrl = sprintf("%s/package/thumbnails/images/%s", $this->baseUrl(), rawurlencode($filename));
+                        $thumbPath = "package" . DS . 'thumbnails' . DS . 'images' . DS . $filename;
+
+                        if (!is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                        }
+                        
+                        ?>
+
+                        <a href="<?php echo $packageDetailUrl; ?>">
+                            <img src ="<?php echo $thumbUrl; ?>" alt ="no-img"/>
+                        </a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                    <?php echo $dtl['title']; ?><br />
+                        <span class="holiday-caption-title">Duration:</span>
+                        <span class="holiday-caption-desc"><?php echo $dtl['no_of_days'] . " days"; ?></span><br />
+                        <span class="holiday-caption-title">Price:</span>
+                        <span class="holiday-caption-desc">$<?php echo number_format($dtl['total_cost'], 2); ?></span><br />
+                        <div class="booknow">
+                            <?php $cip = $this->rijndael->encrypt('package-'.$dtl['package_id']); ?>
+                            <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/'.$cip.'.html'; ?>" >Book Now</a>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="list-duration"></div>
+                </div>
+                <?php
+            }
+        }
+        ?>  
+    </div>
+</div>
+<div class="clear"></div>
+<div class="eightpxseparator"></div>
+
+
+

@@ -1,0 +1,147 @@
+<div id="nad-content" class="nad-content">
+    <div id="content-inner">
+        <?php if(trim($this->content['file_name'])) : ?>
+        <?php if( is_file($this->basePath() . '/uploads/thumbnails/190x105/images/' . trim($this->content['file_name'])) ) : ?>
+        <div id="content-image">               
+            <div class="field-data">               
+                <img src="<?php printf("%s/uploads/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($this->content['file_name'])); ?>"/>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <?php endif; ?>
+        <?php endif; ?>
+
+        <div id="content-heading">
+            <div class="field-label">
+                <label>Heading :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['heading']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <div id="content-keyword">
+            <div class="field-label">
+                <label>Keywords :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['keyword']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <div id="content-metatag">
+            <div class="field-label">
+                <label>Page Title :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['title_tag']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-metatag">
+            <div class="field-label">
+                <label>Description Title :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['desc_tag']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>One Line Description :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['one_line_desc']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>Two Line Description :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['two_line_desc']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>Three Line Description :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['three_line_desc']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>Short Description :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['short_desc']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>Description :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['description']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-description">
+            <div class="field-label">
+                <label>Weight :</label>
+            </div>
+            <div class="field-data">
+                <?php print $this->content['order_no']; ?>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-status">
+            <div class="field-label">
+                <label>Enabled :</label>
+            </div>
+            <div class="field-data">
+                <?php
+                if ($this->content['status'] == 'E') {
+                    $chk = '<img src="/themes/admin/default/images/others/tick-on-white.gif" alt="Checked"/>';
+                    $status = "Enabled";
+                } else {
+                    $chk = '<img src="/themes/admin/default/images/others/cross-on-white.gif" alt="unchecked"/>';
+                    $status = "Disabled";
+                }
+                ?> 
+                <a href="javascript:void(0)" class="<?php echo $status; ?>"><?php echo $chk ?></a>
+                <input class="status-check" type="hidden" name="status" value="<?php echo $status; ?>"/>
+                <input class="content_id" type="hidden" name="content_id" value="<?php echo $this->content['content_id']; ?>"/>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="content-status">
+            <div class="field-label">
+                <label>Approved :</label>
+            </div>
+            <div class="field-data">
+                <?php
+                if ($this->content['approved'] == 'Y') {
+                    $chk = '<img src="/themes/admin/default/images/others/tick-on-white.gif" alt="Checked"/>';
+                    $status = "Approved";
+                } else {
+                    $chk = '<img src="/themes/admin/default/images/others/cross-on-white.gif" alt="unchecked"/>';
+                    $status = "DisApproved";
+                }
+                ?> 
+                <a href="javascript:void(0)" class="<?php echo $status; ?>"><?php echo $chk ?></a>
+                <input class="approval-check" type="hidden" name="status" value="<?php echo $status; ?>"/>
+                <input class="content_id" type="hidden" name="content_id" value="<?php echo $this->content['content_id']; ?>"/>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+<?php
+include(APPLICATION_PATH . '/modules/admin/layouts/drupal/dashboard/content.phtml');
+return;
+?>
+
+<div class="tree-view">
+    <?php
+    print $this->treeHtml;
+    ?>
+</div>
+<?php // Dynamic view content renders here; ?>
+<div class="tree-content"></div>
+<div class="clear"></div>
+<input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />
+
+<?php
+$this->headLink()->appendStylesheet(sprintf("%s/css/tree-hierarchy.css", $this->baseUrl()));
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap.min.css');
+$this->headLink()->appendStylesheet('/css/uploads/style.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap-responsive.min.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap-image-gallery.min.css');
+$this->headLink()->appendStylesheet('/css/uploads/jquery.fileupload-ui.css');
+$this->headLink()->appendStylesheet('/css/uploads/bootstrap.min.css');
+
+$this->headScript()->appendFile(sprintf("%s/js/tree/index.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/tree/event.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ckeditor/ckeditor.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ckeditor/config.js", $this->baseUrl()));
+
+$this->headScript()->appendFile('/js/uploads/vendor/jquery.ui.widget.js');
+$this->headScript()->appendFile("/js/uploads/tmpl.min.js");
+$this->headScript()->appendFile("/js/uploads/load-image.min.js");
+$this->headScript()->appendFile("/js/uploads/canvas-to-blob.min.js");
+$this->headScript()->appendFile("/js/uploads/bootstrap.min.js");
+$this->headScript()->appendFile("/js/uploads/bootstrap-image-gallery.min.js");
+$this->headScript()->appendFile("/js/uploads/jquery.iframe-transport.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload-ip.js");
+$this->headScript()->appendFile("/js/uploads/jquery.fileupload-ui.js");
+$this->headScript()->appendFile("/js/uploads/locale.js");
+$this->headScript()->appendFile("/js/uploads/main.js");
+?>

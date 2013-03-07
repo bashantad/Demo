@@ -1,0 +1,32 @@
+<?php
+$data = array();
+$output = array();
+$isSuggested = false;
+if (!empty($this->element['filtered'])) {
+    $output = $this->element['filtered'];
+}
+else if (!empty($this->element['suggested'])) {
+    $output = $this->element['suggested'];
+    $isSuggested = true;
+}
+
+if (count($output) > 0) {
+    foreach ($output as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    if ($isSuggested) {
+        $msg = "<div class=\"note-wrapper\"> \n
+                    <span class=\"note\"> \n                      
+                        <div class = 'notification-large'><strong> &nbsp;NO OPTIONS AVAILABLE. </strong><br></div>
+                        Please choose from our recommended list of hotels.
+                    </span>
+                 </div>";
+        echo $msg;
+    }
+    echo "<div id=\"txt-available-options\"><h2>Available Options</h2></div>";
+    echo $this->partial('blockListing/filtered-hotels.phtml', array("data" => $data, 'id' => $this->id, 'rijndael' => $this->rijndael));
+}
+else {
+    print "<div align=\"center\">No Records Found !!!</div>";
+}
+?>

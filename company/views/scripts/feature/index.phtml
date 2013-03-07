@@ -1,0 +1,10 @@
+<a href="/package/transportmeans/add">Add new triptype</a>
+<?php foreach($this->transportmeans as $transportmean){ ?>
+<div class="user-role">
+    <?php echo $transportmean->name; ?> | <a href ="/package/transportmeans/delete/id/<?php echo $transportmean->transport_means_id; ?>">Delete</a>
+    | <a href ="/package/transportmeans/edit/id/<?php echo $transportmean->transport_means_id; ?>">Edit</a>
+</div>
+<?php 
+}
+?>
+

@@ -1,0 +1,22 @@
+<?php
+if ($this->grid) {
+    print $this->grid;
+    return;
+}
+?>
+
+<table class="sticky-enabled tabledrag-processed sticky-table" id="content-overview">
+    <thead class="tableHeader-processed">
+        <tr>
+            <th>Heading</th>
+            <th class="checkbox">Enabled</th>
+            <th colspan="3">Operations</th> 
+        </tr>
+    </thead>
+    
+    <tbody>
+        <?php
+        print $this->tableBodyRow;
+        ?>
+    </tbody>
+</table>

@@ -1,0 +1,6 @@
+<?php
+$this->grid->render('pagination', true);
+echo $this->grid;
+$this->headScript()->appendFile($this->baseUrl() . '/js/address/list.js');
+?>
+<input class="action-path" type="hidden" name="action_path" value="/booking/transaction/list/" />

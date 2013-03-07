@@ -1,0 +1,15 @@
+<?php
+$this->headScript()->prependFile(sprintf("%s/js/jquery-1.7.1.min.js", $this->baseUrl()), $type = 'text/javascript');
+?>
+
+<?php print $this->headScript(); ?>
+<style media="print" type="text/css">
+</style>
+
+<?php echo $this->data; ?>
+
+<script>
+    $(document).ready(function() {
+        window.print();
+    });
+</script>

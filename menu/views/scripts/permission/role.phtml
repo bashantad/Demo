@@ -1,0 +1,44 @@
+
+<div id="nad-content" class="nad-content">
+<?php
+$checkPermission = array();
+$userType = array();
+$permissions = array();
+foreach ($this->menupermission as $menuPermission) {
+    $checkPermission[$menuPermission->usertype_id][] = $menuPermission;
+}
+?>
+
+<table class="permission-tbl">
+    <thead>
+        <tr>
+            <th>User type </th>
+            <th> Allow</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($this->usertypes as $usertype): ?>
+            <tr>
+                <td> <?php echo $usertype->name; ?> </td>
+                    <td>
+                        <span class="role-permission">
+                            <?php
+                            $permissionClass = 'notpermitted';
+                            if (isset($checkPermission[$usertype->usertype_id])) {
+                                $permitted = "true";
+                                $permissionClass = 'permitted';
+                            } else {
+                                $permitted = "false";
+                            }
+                            ?>
+                            <input class="menu-check" type="hidden" name="menu_id[]" value="<?php echo $this->menu_id; ?>" />
+                            <input class="menu-user-type" type="hidden" name="usertype_id[]" value="<?php echo $usertype->usertype_id; ?>" />
+                            <input class="permitted-check" type="hidden" name="permission" value="<?php echo $permitted; ?>" />
+                            <a href="javascript:void(0)" class="<?php echo $permissionClass; ?>"> &nbsp;&nbsp;&nbsp;&nbsp;</a>
+                    </td>
+                
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+</div>

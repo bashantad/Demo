@@ -1,0 +1,51 @@
+
+<div id="nad-content" class="nad-content">
+<?php
+$checkPermission = array();
+$userType = array();
+$permissions = array();
+foreach ($this->menupermission as $menuPermission) {
+    $checkPermission[$menuPermission->usertype_id][$menuPermission->perm_id][] = $menuPermission;
+}
+?>
+
+<?php //var_dump($this->permissions); ?>
+<table class="permission-tbl">
+    <thead>
+        <tr>
+            <th>User type </th>
+            <?php foreach ($this->permissions as $permission): ?>
+                <th><?php echo $permission->short_name; ?> </th>
+            <?php endforeach; ?>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($this->usertypes as $usertype): ?>
+            <tr>
+                <td> <?php echo $usertype->name; ?> </td>
+                <?php foreach ($this->permissions as $permission): ?>
+                    <td>
+                        <span class="role-permission">
+                            <?php
+                            $permissionClass = 'notpermitted';
+                            if (isset($checkPermission[$usertype->usertype_id][$permission->perm_id])) {
+                                //$check = '<img src="/themes/admin/default/images/others/tick-on-white.gif" alt="Checked" />';
+                                $permitted = "true";
+                                $permissionClass = 'permitted';
+                            } else {
+                                //$check = '<img src="/themes/admin/default/images/others/cross-on-white.gif" alt="unchecked" />';
+                                $permitted = "false";
+                            }
+                            ?>
+                            <input class="menu-check" type="hidden" name="menu_id[]" value="<?php echo $this->menu_id; ?>" />
+                            <input class="menu-user-type" type="hidden" name="usertype_id[]" value="<?php echo $usertype->usertype_id; ?>" />
+                            <input class="permitted-check" type="hidden" name="permission" value="<?php echo $permitted; ?>" />
+                            <input class="menu-perm-id" type="hidden" name="perm_id[]" value="<?php echo $permission->perm_id; ?>" />              
+                            <a href="javascript:void(0)" class="<?php echo $permissionClass; ?>"> &nbsp;&nbsp;&nbsp;&nbsp;</a>
+                    </td>
+                <?php endforeach; ?>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+</div>

@@ -1,0 +1,54 @@
+<?php
+//var_dump($this->package);exit();
+$packages = array();
+foreach ($this->package as $package):
+    //$packages[$package->day][$package->description][] = $package->name;
+    $packages[$package->day]['elements'][] = array('name' => $package->name);
+    $packages[$package->day]['description'] = $package->description;
+    $packages[$package->day]['itinerary_image_name'] = $package->itinerary_image_name;
+    $packages[$package->day]['itinerary_image_url'] = $package->itinerary_image_url;
+endforeach;
+?>
+<?php
+//echo "<pre>";
+//print_r($packages);
+//exit(); 
+?>
+<?php
+foreach ($packages as $key => $value) {
+    $thumbPath = 'uploads' . DS . 'element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $value['itinerary_image_name'];
+    $imageUrl = $this->baseUrl() . '/uploads/element/thumbnails/120x120/images/' . rawurlencode($value['itinerary_image_name']);
+    $thumbUrl = $this->baseUrl() . '/uploads/element/thumbnails/120x120/images/' . rawurlencode($value['itinerary_image_name']);
+    if (!is_file($this->basePath() . DS . $thumbPath)) {
+        $imageUrl = sprintf("%s/images/no-image/700x400.jpg", $this->baseUrl());
+        $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+    }
+    ?>
+    <div class="itinerarywrapper">
+        <div class="itinerary-thumb">
+            <img height="70" width="70" alt="Annapurna Circuit Trek" src="<?php echo $thumbUrl; ?>">
+        </div>	
+        <div class="itinerary-detail">
+            <div class="itineraryrow">
+                <span class="itinerarytitle">Day <?php echo $key; ?> &nbsp;</span>
+            </div>
+            <div class="days-itinerary-detail">
+                <?php
+                //var_dump($value['elements']);
+                foreach ($value['elements'] as $key => $val) {
+                    foreach ($val as $data) {
+                        echo "<div class='itinerary-item'> " . $data . "</div> ";
+                    }
+                }
+                $desc = nl2br(trim($value['description']));
+                if ($desc) {
+                    printf("<div class='itinerary-show-detail'><a href='javascript:void(0);' style='color:#0056C1;'>Show Detail</a></div>");
+                }
+                echo "<div class='itinerary-desc hidden'> " . $desc . "</div> ";
+                ?>
+                <!--            Arriving Kathmandu from your homeport, where our representative meets you at the airport, transfers you to your hotel. -->
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>  
+<?php } ?>

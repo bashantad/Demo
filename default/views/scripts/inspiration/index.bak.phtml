@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Inspiration</title>
+        <link href="<?php echo $this->theme('styles/layout.css') ?>" rel="stylesheet" type="text/css" />
+        <link href="<?php echo $this->theme('themes/default/css/theme-core-colors-backgrounds.css') ?>" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body>
+        <div id="inspiration-mainwrapper">
+            <div class="inspiration-elephant-bath">
+
+                <div id="inspiration-content-wrapper">
+                    <div id="inspiration-left-wrapper">
+                        <div id="inspiration-left-inner-wrapper">
+                            <div class="inspiration-text-blocks-wrapper">
+                                <div class="inspiration-text-block1">
+                                    <div class="inspiration-text-block1-content">To be able to stand and look into their thoughtful eyes while hugging their trunk was one of the most memorable experiences I've ever had.<br />
+                                      <br />
+                                    A mix between walking and jeep safaris, elephant rides involve you and   about three other passengers along with the elephant driver(?) lurching   through forest trails and fording streams to get right next to herds of   rhinos and sometimes deer, and if you are very lucky, a tiger even.   </div>
+
+                              </div>
+                                <div class="inspirations-comments">
+                                    <div class="inspiration-share-elephant-bath">
+                                        <a href="#">Add Your Comment</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="#">Post Your Story</a>
+                                        <div class="inspiration-sharebuttons"><img src="<?php echo $this->theme('images/oval-fb-icon.png') ?>" alt="FaceBook" width="16" height="16" /> 
+                                            <img src="<?php echo $this->theme('images/oval-twitter-icon.png') ?>" alt="Twitter" /> <img src="<?php echo $this->theme('images/oval-digg-icon.png') ?>" alt="Digg" /> 
+                                            <img src="<?php echo $this->theme('images/oval-gplus-icon.png') ?>" alt="Google+" /></div></div>
+                                    <div class="inspirations-comments-elephant-bath-content">
+                                        <h2>Comments</h2>
+                                        <div class="inspirations-comments-elephant-bath-wrapper">Wow!!!! Looks like You had a Craziest Thing of your life. Can’t wait to experience the same thing. I will surely do Elephant Bath whenever I have a chance.
+                                            <div class="commentor">
+                                                <img src="<?php echo $this->theme('images/commentor-image.jpg') ?>" align="left" /> This is the Commentor
+
+                                                <div class="clear"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="inspiration-right-wrapper">
+                        <?php
+                        echo $this->partial("blockListing/packageList.phtml", array('relatedPackage' => $this->relatedPackage, 'thumbPath' => $this->thumbPath, 'UploadDir' => $this->UploadDir));
+                        echo $this->partial('blockListing/inspirationList.phtml', array('relatedInspiration' => $this->relatedInspiration));
+                        ?>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

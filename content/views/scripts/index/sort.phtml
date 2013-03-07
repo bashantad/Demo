@@ -1,0 +1,192 @@
+<?php
+$this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.core.min.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.mouse.min.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.widget.min.js", $this->baseUrl()));
+$this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.sortable.min.js", $this->baseUrl()));
+?>
+<!--******************************************* ACTIVITIES STARTS *******************************-->
+<select name="search_element_type" id="search-element-type" class="form-select">
+    <option value="">--Select Element--</option>
+    <?php
+    foreach ($this->elements as $element) :
+        if ($element['name'] != "Holiday") {
+            ?>
+            <option value="<?php print $element['element_id']; ?>"><?php print $element['name']; ?></option>
+            <?php
+        }
+    endforeach;
+    ?>
+</select>
+
+<style type="text/css">
+    a.tabledrag-handle {
+        padding-right: .5em;
+    }
+    .ui-sortable-helper {
+        background-color: #efefef;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.fieldset-title').on('click', function() {
+            $(this).parent().children('.fieldset-content').toggle();
+        });
+        
+        $(".fieldset-content tbody").sortable({
+            handle: '.tabledrag-handle',
+            containment : 'parent',
+            placeholder : 'ui-state-highlight',
+            forcePlaceholderSize : true,
+            tolerance : 'pointer',
+            //helper : 'original', 
+            helper: function(event, element) {
+                element.children().each(function() {
+                    var $this = $(this);
+                    $this.width($this.width());
+                });
+                return element;
+            },
+            update: function(event, ui)
+            {
+                var $tr = ui.item;
+                var warning = '<span class="warning tabledrag-changed">*</span>';
+                if (! $tr.find('.content-multiple-drag').children('.tabledrag-changed').length) {
+                    $tr.find('.content-multiple-drag').append(warning);
+                }
+                
+                var cnt = 0;
+                $(this).children('tr').each(function(k,v) {
+                    cnt = k + 1;
+                    $(this).find('td:eq(1)').text(cnt);
+                });
+            },
+            forceHelperSize : true
+        });
+    });
+</script>
+<?php
+$data = array();
+if (count($this->element) > 0) {
+    foreach ($this->element as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    ?>
+
+    <?php 
+    if (count($data) > 0) :
+        foreach ($data as $title_ecid => $items) : 
+        $keys = explode('::::', $title_ecid);
+    ?>
+    <div class="fieldset collapsible collapsed admin-processed">
+        <h2 class="fieldset-title">
+            <a href="javascript:void(0);" class="show_hide"><?php print ucwords($keys[0]); ?></a>
+        </h2>
+        <div class="fieldset-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="40px;"></th>
+                        <th>SN</th>
+                        <th>Image</th>
+                        <th>Content Heading</th>
+                        <th>Order No</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $count = 1;
+                    foreach ($items as $cid => $content) :
+                        $iname = ($content['file_name']);
+                        $thumbPath = 'uploads' . DS . 'thumbnails' . DS . '40x40' . DS . 'images' . DS . $iname;
+                        $thumbUrl = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                        if (is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/uploads/thumbnails/40x40/images/%s", $this->baseUrl(), rawurlencode($iname));
+                        }
+                    ?>
+                    <tr>
+                        <td class="content-multiple-drag">
+                            <a title="Drag to re-order" href="#" class="tabledrag-handle"><div class="handle">&nbsp;</div></a>
+                        </td>
+                        <td><?php print $count++ ?></td>
+                        <td>
+                            <input type ="hidden" name="content_id" value="<?php print $content['content_id'] ?>" />
+                            <img src="<?php print $thumbUrl; ?>" alt="no-img" />
+                        </td>
+                        <td><?php print $content['heading'] ?></td>
+                        <td><?php print $content['order_no'] ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php
+    if (count($data) > 0) {
+        foreach ($data as $keys => $item1) {
+            $keySplit = explode("::::", $keys);
+            $key1 = $keySplit[0];
+            ?>
+            <h2><?php echo ucwords($key1); ?></h2>                    
+
+            <div id="activities-scrollwrapper-<?php print strtolower($key1) ?>" class="activities-scrollwrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Image</th>
+                            <th>Content</th>
+                            <th>Order No</th>
+                        </tr>
+                    </thead>
+                    <tbody>   
+
+                        <?php
+                        $count = 1;
+
+                        foreach ($item1 as $key => $item) {
+                            $thumb = 'uploads' . DS . 'thumbnails' . DS . '40x40' . DS . 'images' . DS . ($item['file_name']);
+                            switch (trim($thumb)) {
+                                case '':
+                                case NULL:
+                                case (!is_file($this->basePath() . DS . $thumb)) :
+                                    $thumb = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                                    break;
+                                default:
+                                    $thumb = $this->baseUrl() . '/uploads/thumbnails/40x40/images/' . rawurlencode($item['file_name']);
+                            }
+                            ?>                 
+                            <tr>
+                                <td><?php echo $count ?></td>
+                                <td><input type ="hidden" name="content_id" value="<?php echo $item['content_id'] ?>"><img src = "<?php echo $thumb; ?>" alt ="no-img"/></td>
+                                <td><?php echo $item['heading'] ?></td>
+                                <td><?php echo $item['order_no'] ?></td>                                        
+                            </tr>
+                            <?php
+                            $count++;
+                        }
+                        ?>
+                    </tbody>
+                </table>
+                <div class="clear"></div>                        
+                <?php
+            }
+        } else {
+            echo "No Records(0)";
+        }
+        ?>
+    <?php } ?>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#search-element-type').change(function(){
+                var data = {'id':$(this).val()};  
+                $('#content').load(site.baseUrl + '/content/index/sort/format/html', data, function() {
+                });
+            });
+        });           
+    </script>
+
+

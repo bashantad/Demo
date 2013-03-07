@@ -1,0 +1,45 @@
+<div id="rightpanel">
+<div class="rightcontentbox">
+        <h2>Suggested Services</h2>
+        <?php
+        foreach ($this->elementDetail as $dtl) {
+            $params = sprintf("company_id=%s&element_dtl_id=%s", $dtl->company_id, $dtl->element_dtl_id);
+            $cipherQuery = $this->rijndael->encrypt($params);
+            ?>
+
+            <div class="otherhotelslistwrapper">
+                <form action="<?php echo $this->siteUrl() . "/default/serviceprovider/book"; ?>" method="post" >
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $fn = '';
+                        if ($dtl->image_url) {
+                            $fn = end(explode('/', $dtl->image_url));
+                        }
+
+                        $thumbPath = 'uploads' .DS . 'element' . DS . 'thumbnails' . DS . '120x120' .DS . 'images' . DS . rawurlencode($fn);
+                        $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                        if (is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/uploads/element/thumbnails/120x120/images/%s", $this->baseUrl(), $fn);
+                        }
+                        $dtlUrl = $this->siteUrl() . "/serviceprovider/detail/?q={$cipherQuery}";
+                        ?>
+                        <a href="javascript:void(0);">
+                            <img height="70" width="70" src="<?php echo $thumbUrl; ?>"/>
+                        </a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                        <h3 class="right-title"><?php echo $dtl->description; ?></h3>
+                        <span class="holiday-caption-desc">Hotel: <?php echo ucwords($dtl->company_name); ?></span><br />
+                        <span class="holiday-caption-desc">Price: $<?php echo number_format($dtl->price, 2) ?></span><br />   
+                    </div>
+                    <div class="clear"></div>
+                    <?php $cip = $this->rijndael->encrypt('element-' . $dtl->element_dtl_id); ?>
+                    <div class="list-duration">
+                         <?php $cip = $this->rijndael->encrypt('element-'.$dtl->element_dtl_id); ?>
+                        <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/'.$cip . '.html'; ?>" >Book Now</a>
+                    </div>
+                </form>
+            </div>
+        <?php } ?>  
+    </div>
+</div>

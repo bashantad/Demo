@@ -1,0 +1,278 @@
+<?php if ($this->treeHtml) : ?>
+    <div class="tree-view">
+        <?php print $this->treeHtml; ?>
+    </div>
+    <?php
+    $this->headScript()->appendFile($this->baseUrl() . '/js/user/uniqueness.js');
+    $this->headLink()->appendStylesheet(sprintf("%s/css/tree-hierarchy.css", $this->baseUrl()));
+//    $this->headLink()->offsetUnset($offsetToBeRemoved);
+//    foreach($this->headLink()->getIterator() as $key=>$value) {
+//        print_r($key);
+//    }
+//    exit;
+    $this->headScript()->appendFile(sprintf("%s/js/tree/index.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/event.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ckeditor/ckeditor.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ckeditor/config.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/custom-form-message.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.core.min.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.widget.min.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.mouse.min.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.sortable.min.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/ui/jquery.ui.nestedSortable.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/formValidation.js", $this->baseUrl()));
+    $this->headScript()->appendFile(sprintf("%s/js/tree/content-search.js", $this->baseUrl()));
+    ?>
+<?php endif; ?>
+
+<style type="text/css">
+    #image {
+        height: 300px;
+        overflow: hidden;
+        cursor: pointer;
+        background: #000;
+        color: #fff;
+    }
+    #image img {
+        visibility: hidden;
+    }
+    #img-wrapper {
+        width: 98%;
+        height: 300px;
+    }
+    .search-result-found{
+        background-color: #E0E0E0;
+    }
+    
+    #content .tree-content .content-form-wrapper .default-tag-radio {
+        width: auto;
+    }
+    .form-item .default-tag-label {
+        display: inline;
+    }
+    .radioBtn label, .radioBtn input {
+        display: inline;
+    }
+
+</style>
+
+<?php // Dynamic view content renders here; ?>
+<div class="tree-content">   
+    <form id ="formid" action="<?php echo $this->setAction ?>" enctype="application/x-www-form-urlencoded" method="post">
+        <div class="content-form-wrapper node-form" style ="float: left;">
+            <?php
+            if ($this->content_img_link != "") {
+                $src = '';
+                $imgParts = explode('/', $this->content_img_link);
+                if (count($imgParts) > 1) {
+                    $src = sprintf("%s/uploads/thumbnails/700x400/images/%s", $this->baseUrl(), trim(end($imgParts)));
+                }
+                $this->form->content_image_link->setDescription("<div id='image' onclick='openKCFinder(this)'><img id='img' src={$src} style='margin-left: 0px; visibility: visible;' alt ='Click here and select image on a double click'></div><div style='float:left;'><b>Click on image to change</b></div><div style='float:right;'><a class='img-remove' href='javascript:void(0);'>Remove</a></div><div class='clear'></div>");
+            }
+            if ($this->leafType == "Y") {
+                /*  $this->form->getElement('content_image_link')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('content_image_link');
+
+                  $this->form->getElement('one_para_desc')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('one_para_desc');
+
+                  $this->form->getElement('one_line_desc')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('one_line_desc');
+
+                  $this->form->getElement('two_line_desc')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('two_line_desc');
+
+                  $this->form->getElement('three_line_desc')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('three_line_desc');
+
+                  $this->form->getElement('short_desc')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('short_desc');
+
+                  $this->form->getElement('desc_tag')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('desc_tag');
+
+                  $this->form->getElement('title_tag')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('title_tag');
+
+                  $this->form->getElement('keyword')->setRequired(false)->clearValidators();
+                  $this->form->removeElement('keyword'); */
+
+                $this->form->removeElement('content_image_link');
+                $this->form->removeElement('one_para_desc');
+                $this->form->removeElement('one_line_desc');
+                $this->form->removeElement('two_line_desc');
+                $this->form->removeElement('three_line_desc');
+                $this->form->removeElement('short_desc');
+                $this->form->removeElement('desc_tag');
+                $this->form->removeElement('title_tag');
+                $this->form->removeElement('keyword');
+                $this->form->is_leaf->setValue($this->leafType);
+            }
+            
+            $default_ecid = ($this->default_ecid || $this->setDefaultTag) ? "<input type='hidden' name='default_ecid' value='{$this->default_ecid}' />" : '';
+            $decy = $default_ecid ? 'checked="checked"' : '';
+            $decn = (!$default_ecid) ? 'checked="checked"' : '';
+            foreach ($this->form->getElements() as $element) {
+                if($element->getName() == 'heading') {
+                    $value = $element->getValue();
+                    $defaultEcidHtml = "";
+                    if ($this->leafType == 'N') {
+                    $defaultEcidHtml = '<div>'
+                                    .       '<label class="default-tag-label">Create Default Heading Tag: </label>'
+                                    .       '<input class="default-tag-radio" type="radio" name="set_default_tag" value="Y" ' . $decy . ' />Yes'
+                                    .       '<input class="default-tag-radio" type="radio" name="set_default_tag" value="N" ' . $decn . ' />No'
+                                    .       $default_ecid
+                                    .   '</div>';
+                    }
+                    $headingHtml = '<div class="form-item">' 
+                                    .   '<div class="Label">'
+                                    .       '<label for="heading" class="required">Heading:&nbsp;<span class="form-required">*</span>&nbsp;</label>'
+                                    .       '<input type="text" name="heading" id="heading" value="' . $value . '" size="83" class="form-text">'
+                                    .   '</div>'
+                                    .   $defaultEcidHtml
+                                    .'</div>';
+                    print $headingHtml;
+                }
+                else {
+                    print($element);
+                }
+                
+            }
+            ?>
+        </div>
+        <div class="content-tag-wrapper" style ="float: right;">   
+            <?php
+            echo $this->partial('tags/tag.phtml', array('elementHierarchy' => $this->elementHierarchy, 'tags' => $this->tags));
+            // exit; 
+            ?>
+        </div> <!-- end content-tag-wraper -->
+        <div class="clear"></div>
+    </form> <!-- end form -->
+</div>
+<div class="clear"></div>
+<div class="hidden">
+    <input type="hidden" name="action" value="<?php print $this->action; ?>" />
+</div>
+
+</div>
+<div class="clear"></div>
+<input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />
+
+<script type="text/javascript">   
+    $('.img-remove').live('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if (confirm('Are you sure you want to remove the image ?')) {
+            $('#content_image_link').val('');
+            var html = '<div id="image" onclick="openKCFinder(this)"><div style="margin:5px">Click here to choose an image</div></div>';
+            $('#image').parent().html(html);
+        }
+        return false;
+    });
+    function openKCFinder(div) {
+        window.KCFinder = {
+            callBack: function(url) {
+                window.KCFinder = null;
+                div.innerHTML = '<div style="margin:5px">Loading...</div>';
+                var img = new Image();
+                img.src = url;
+                img.onload = function() {
+                    // Explode the url to get filename
+                    var imgParts = explode('/', url);
+                    if (imgParts.length <= 1) {
+                        alert('There seems to be a problem in image. Please contact system administrator!');
+                        div.innerHTML = '<div style="margin:5px">Click here to choose an image</div>';
+                        return false;
+                    }
+                    var imgSrc = site.imageUrl + '/uploads/thumbnails/700x400/images/' + (end(imgParts));
+                    var inHtml =    '<div onclick="openKCFinder(this)" id="image"><img id="img" src="' + imgSrc + '" /></div>'
+                        +'<div style="float:left;"><b>Click on image to change</b></div>'
+                        +'<div style="float:right;"><a href="javascript:void(0);" class="img-remove">Remove</a></div>'
+                        +'<div class="clear"></div>';
+                    //div.innerHTML = '<img id="img" src="' + imgSrc + '" />';
+                    $(div).parent().html(inHtml);
+                    var img = document.getElementById('img');
+                    var o_w = img.offsetWidth;
+                    var o_h = img.offsetHeight;
+                    var f_w = div.offsetWidth;
+                    var f_h = div.offsetHeight;
+                    if ((o_w > f_w) || (o_h > f_h)) {
+                        if ((f_w / f_h) > (o_w / o_h))
+                            f_w = parseInt((o_w * f_h) / o_h);
+                        else if ((f_w / f_h) < (o_w / o_h))
+                            f_h = parseInt((o_h * f_w) / o_w);
+                        //                    img.style.width = f_w + "px";
+                        //                    img.style.height = f_h + "px";
+                    } else {
+                        f_w = o_w;
+                        f_h = o_h;
+                    }
+                    //                img.style.marginLeft = parseInt((div.offsetWidth - f_w) / 2) + 'px';
+                    //                img.style.marginTop = parseInt((div.offsetHeight - f_h) / 2) + 'px';
+                    img.style.visibility = "visible";
+                    $('#content_image_link').val(url);
+                    $('#kcfinder-frame').remove();
+                }
+            }
+        };
+//        window.open('/js/ckeditor/kcfinder/browse.php?type=images&dir=uploads/public&mode=uploads',
+//        'kcfinder_image', 'status=0, toolbar=0, location=0, menubar=0, ' +
+//            'directories=0, resizable=1, scrollbars=0, width=800, height=600'
+//        );    
+        if ($('#kcfinder-frame').length) {
+            $('#kcfinder-frame').remove();
+        }
+        else {
+            var cid = $.trim($('#content_id').val());
+            var frame = '<iframe name="kcfinder_iframe" src="/js/ckeditor/kcfinder/browse.php?type=images&dir=images/public&mode=content&id=' +cid +
+                        '" frameborder="0" width="100%" height="200px" marginwidth="0" marginheight="0" scrolling="no" />';
+            $('#image').closest('.form-item').after('<div id="kcfinder-frame">'+frame+'</div>');
+        }
+   
+    }
+    $(document).ready(function() {
+        /* $('input:radio[name^="is_leaf"]').change(function(){
+            var value = $(this).val();
+            var content_id = $('#content_id').val();          
+            $.ajax({
+                url:'/content/index/add/id/'+content_id+'/type/'+value+'/format/json',
+                success: function(res){
+                    $('.tree-content').html(res.html);                   
+                }
+            });
+        });*/
+        $('input:radio[name^="is_leaf"]').change(function(){
+            var aid = 0; 
+            if ($('.treeview').find('a.active').length) {
+                aid = Number($('.treeview').find('a.active').attr('id').replace('term-link-', ''));
+            }
+            var value = $(this).val();                    
+            $.ajax({
+                type: 'POST',
+                data: 'active_id='+aid,
+                url:'/content/index/add/type/'+value+'/format/json',
+                dataType: 'json',
+                success: function(data) {        
+                    if (data.redirect) {
+                        window.location = site.baseUrl;
+                    }
+                    $('.error').html('');
+                    $('#console').hide();
+                    $('.tree-content').replaceWith(data.html);
+                    $('#tabbar-content').html(data.tab);
+                },
+                error: function(err) {
+                    alert('Ajax Failed !!!');
+
+                }
+            });
+            return false;
+        });
+        var instance = CKEDITOR.instances.description;
+        if(instance) {
+            CKEDITOR.remove(instance);
+        }      
+        CKEDITOR.replace( 'description' );
+    });  
+</script>

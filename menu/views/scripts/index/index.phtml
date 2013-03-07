@@ -1,0 +1,23 @@
+<div class="tree-view">
+    <?php
+    print $this->treeHtml;
+    ?>
+</div>
+<?php // Dynamic view content renders here; ?>
+<div class="tree-content"></div>
+<div class="clear"></div>
+<input id="action-path" type="hidden" name="action_path" value="<?php echo $this->path; ?>" />
+
+<?php
+$this->headLink()->appendStylesheet($this->baseUrl() . '/css/tree-hierarchy.css');
+$this->headScript()->appendFile($this->baseUrl() . '/js/tree/index.js');
+$this->headScript()->appendFile($this->baseUrl() . '/js/tree/event.js');
+$this->headScript()->appendFile($this->baseUrl() . '/js/menu/permission.js');
+//$this->headScript()->appendFile($this->baseUrl() . '/ckeditor/ckeditor.js');
+?>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#browser li div:first').trigger('click');
+    });
+</script>

@@ -1,0 +1,401 @@
+<?php //var_dump($this->overview);exit();                                                    ?>
+<!-- PLACES GALLERY -->
+
+<link href="<?php echo $this->theme('jquery-components/themes/base/jquery.ui.tabs.css') ?>" rel="stylesheet" type="text/css">
+<link href="<?php echo $this->theme('jquery-components/themes/base/jquery.ui.base.css') ?>" rel="stylesheet" type="text/css">
+<?php
+$this->headLink()->appendStylesheet(sprintf("%s/css/jquery.fancybox-1.3.4.css", $this->baseUrl()));
+echo $this->headScript()->appendFile(sprintf("%s/js/jquery.fancybox-1.3.4.js", $this->baseUrl()));
+?>
+<script type="text/javascript" src="/js/utility.js"></script>
+<script type="text/javascript" src="<?php echo $this->theme('js/jquery.ad-gallery.js') ?>"></script>
+<script src="<?php echo $this->theme('jquery-components/ui/jquery.ui.tabs.js') ?>"></script>
+
+<script type="text/javascript">
+    $(function() {        
+        var galleries = $('.ad-gallery').adGallery();
+        $('#switch-effect').change(
+        function() {
+            galleries[0].settings.effect = $(this).val();
+            return false;
+        }
+    );
+        $('#toggle-slideshow').click(
+        function() {
+            galleries[0].slideshow.toggle();
+            return false;
+        }
+    );
+    });
+</script>
+
+<div id="leftmaincol">    
+    <?php $result = $this->overview; ?>    
+    <h1>
+        <?php
+        echo trim($result['title']);
+        ?>
+    </h1>
+    <div id="gallery" class="ad-gallery">
+        <div class="ad-image-wrapper"> 
+        </div>
+        <div class="ad-controls">
+        </div>
+        <div class="ad-nav">
+            <div class="ad-thumbs">
+                <ul class="ad-thumb-list"> 
+                    <li> 
+                        <?php
+                        $largeImage = 'package' . DS . 'thumbnails' . DS . '700x400' . DS . 'images' . DS . $result['file_name'];
+                        $primaryThumb = 'package' . DS . 'thumbnails' . DS . '40x40' . DS . 'images' . DS . $result['file_name'];
+                        switch (1) {
+                            case '':
+                            case NULL:
+                            case (!is_file($this->basePath() . DS . $primaryThumb)) :
+                                $primaryThumb = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                                $largeImage = sprintf("%s/images/no-image/700x400.jpg", $this->baseUrl());
+                                break;
+                            default:
+                                $primaryThumb = $this->baseUrl() . '/package/thumbnails/40x40/images/' . rawurlencode($result['file_name']);
+                                $largeImage = $this->baseUrl() . '/package/thumbnails/700x400/images/' . rawurlencode($result['file_name']);
+                        }
+                        ?>
+                        <a href="<?php echo $largeImage; ?>">
+                            <img src="<?php echo $primaryThumb; ?>" title="<?php echo $result['title']; ?>" alt="No Image" class="image<?php echo $result['package_id'] ?>"/>
+                        </a>
+                    </li>
+
+                    <?php
+                    if ($this->photos) {
+                        $totImgCnt = sizeof($this->photos);
+                        foreach ($this->photos as $image) {
+                            $thumbPath = 'package' . DS . 'thumbnails' . DS . '700x400' . DS . 'images' . DS . $image->file_name;
+                            $imageUrl = $this->baseUrl() . '/package/thumbnails/700x400/images/' . rawurlencode($image->file_name);
+                            $thumbUrl = $this->baseUrl() . '/package/thumbnails/40x40/images/' . rawurlencode($image->file_name);
+                            if (!is_file($this->basePath() . DS . $thumbPath)) {
+                                $imageUrl = sprintf("%s/images/no-image/700x400.jpg", $this->baseUrl());
+                                $thumbUrl = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                            }
+                            if ($thumbUrl == $primaryThumb || $totImgCnt == 1) {
+                                continue;
+                            }
+                            ?>
+                            <li>
+                                <a href="<?php echo $imageUrl; ?>" title="<?php echo rawurlencode($image->file_name); ?>">
+                                    <img src="<?php echo $thumbUrl; ?>" title ="<?php echo isset($image->caption) ? $image->caption : ''; ?>"alt="<?php echo isset($image->description) ? $image->description : '' ?>" />
+                                </a>
+                            </li>
+                            <?php
+                        }
+                    }
+                    ?>
+
+                </ul>
+            </div>
+        </div>
+    </div>				
+
+    <div class="eightpxseparator"></div>
+
+    <div id="places-description">
+        <div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+            <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+                <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active"><a href="#overview">Overview</a></li>
+                <li class="ui-state-default ui-corner-top"><a href="#itinerary">Itinerary</a></li>
+                <!--  <li class="ui-state-default ui-corner-top"><a href="#gallery">Gallery</a></li>
+                  <li class="ui-state-default ui-corner-top"><a href="#testimonials">Testimonials</a></li>
+                  <li class="ui-state-default ui-corner-top"><a href="#map">Map</a></li>-->
+                <?php
+                $leafTabHtml = "";
+                $leafTabContentHtml = "";
+                ?>
+                <?php
+                if (count($this->results) > 0) {
+                    foreach ($this->results as $tabs) {
+                        ?> 
+                        <?php
+                        $leafTabHtml .= sprintf("<li><a href='#tab-%s'>%s</a></li>\n", $tabs['tab_id'], $tabs['tab_heading']);
+                        $leafTabContentHtml .= sprintf(
+                                "<div id='tab-%s'> \n" .
+                                "<p>%s</p>" .
+                                "</div>", $tabs['tab_id'], $tabs['tab_description']
+                        );
+                        ?>
+                        <?php
+                    }
+                }
+                print $leafTabHtml;
+                ?>                    
+            </ul>
+            <?php
+            print $leafTabContentHtml;
+            ?>            
+            <div id="overview" class="ui-tabs-panel ui-widget-content ui-corner-bottom">
+                <div class="infopanel">
+                    <?php if (isset($result['overall_rank'])) : ?>
+                        <?php if ((int) $result['overall_rank'] <= 5) : ?>
+                            <div class="inforow">
+                                <span class='fivestar-ratings'>
+                                    <?php echo $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $result['overall_rank'], 'type' => 'package_rating', 'table' => ' ', 'id' => $result['package_id']))); ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+<!--                    <div class="inforow"><span class="holiday-caption-title">Destination:</span> <span class="holiday-caption-desc">Pokhara</span></div>-->
+
+                    <div class="inforow"><span class="holiday-caption-title">Duration:</span>  <span class="holiday-caption-desc"><?php echo $result['no_of_days'] ?> Days</span></div>
+                    <div class="inforow"><span class="holiday-caption-title">Trip Cost:</span> <span class="holiday-caption-desc">$<?php echo number_format($result['total_cost'], 2) ?> per couple</div>
+
+                    <?php if ($this->offer): ?>
+                        <div class="inforow"><span class="holiday-caption-title">Offer:</span>  <span class="holiday-caption-desc"> <?php echo $this->offer->value_type == 'VALUE' ? $this->offer->name . " ( $" . $this->offer->value . " Discount )" : $this->offer->name . " ( " . $this->offer->value . "% Discount )" ?> </span></div>
+                    <?php endif; ?>
+
+                    <?php
+                    if ($result['fixed_departure'] == 'Y'):
+                        $cipher = $this->rijndael->encrypt($result['package_id']);
+                        ?>
+                        <div class="inforow"><span class="holiday-caption-desc">
+                                <input class="package-id" type="hidden" value="<?php echo $cipher ?>">
+                                <a href='javascript:void(0);' class='fixed-departure-dates'>Click for <b>Fixed Departure</b> Date</a>
+                                <div id ="fixed-departure-date-list-<?php echo $result['package_id'] ?>" class="fixed-dates-list" style="display:none;"></div>
+                            </span>
+                        </div>
+                        <?php
+                    endif;
+                    $title = $result['title'];
+                    $cipher = $this->rijndael->encrypt($result['package_id']);
+                    $session = Zend_Registry::get('defaultsession');
+                    $likeUrl = sprintf("%s/holidays/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+                    $likeClass = 'pk-like';
+                    $likeImageClass = 'pk-img-like';
+                    $likeBtn = 'themes/default/themeimages/ic-like.png';
+                    $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+                    $pklikeAltText = 'Like';
+                    $pklikeWords = 'Like';
+                    if (isset($session->userlikedpackage[$result['package_id']]) && $session->userlikedpackage[$result['package_id']] == "package-liked") {
+                        $likeUrl = sprintf("%s/holidays/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                        $likeClass = 'pk-unlike';
+                        $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                        $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+                        $pklikeAltText = 'Unlike';
+                        $pklikeWords = 'Unlike';
+                        $likeImageClass = 'pk-img-unlike';
+                    }
+                    ?>
+                    <div class ="likes-bar" style="float:left">
+
+
+                        <?php
+                        $cip = $this->rijndael->encrypt('package-' . $result['package_id']);
+                        $bookUrl = sprintf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cip);
+                        ?>
+                        <a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a>
+                        <?php
+                        $packageId = $result['package_id'];
+                        $cipherQuery = $this->rijndael->encrypt("package_id=$packageId");
+                        ?>
+                        <a href="<?php echo $this->siteUrl() ?>/default/package/customize/?q=<?php echo $cipherQuery; ?>" class="link-button">Configure</a>
+                        <a class="link-button <?php echo $likeClass . ' ' . $likeImageClass; ?>" href="<?php print $likeUrl; ?>">
+                            <span class="like-phrase"><?php echo $pklikeWords ?></span>
+                            <img border="0" alt="<?php echo $pklikeAltText; ?>" src="<?php echo $this->theme($pkLikeBtn) ?>">                         
+                        </a>
+                        <!--<a href="#" class="link-button">Add to Your Likes</a>-->
+                        <div class="clear"></div>                        
+
+                    </div>
+                    <div class="clear"></div>
+                    <div class="tellafriend"><a href="/holidays/tellafriend" class="link-tellafriend">Tell your friend</a></div>
+
+                </div>
+
+                <div class="infodesc">
+
+                    <div class="desc word-limiter-text-trimmed">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($result['description']), 1400);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                            <?php
+                            $cipher = $this->rijndael->encrypt($result['package_id']);
+                            $packageUrl = "{$this->siteUrl()}/holidays/" . urlencode($result['title']) . "/{$cipher}.html";
+                            ?>
+                            <a class="read-more" href="<?php print $packageUrl; ?>">more...</a>                        
+                        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+                        <?php print $result['description']; ?><br />
+                        <a class="read-less" href="javascript:void(0);" />...less</a>
+                    </div>
+                    <p><?php //echo $result['description']                                     ?></p>
+                </div>
+                <div class="clear"></div>
+                <?php
+                echo $this->partial('review/review.phtml', array('type' => 'package_review', 'id' => $result['package_id'], 'data' => $this->review));
+                ?>
+            </div>
+            <div id="itinerary" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+            </div>
+
+            <div id="gallery" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+                <p>Gallery Not Available.</p>
+            </div>
+
+            <div id="testimonials" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+                <p>Testimonials Not Available.</p>
+            </div>
+
+            <div id="map" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-tabs-hide">
+                <p>Map Not Available</p>
+            </div>        
+            <?php /*
+              <div id='book-link'>
+              <a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a>
+              </div>
+             */ ?>
+        </div>   
+    </div>
+</div>
+<div id="rightpanel">
+    <?php /*
+      <div class="rightcontentbox">
+      <iframe width="270" height="310" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=+&amp;q=Kathmandu&amp;ie=UTF8&amp;hq=&amp;hnear=Kathmandu,+Central+Region,+Nepal&amp;ll=27.702871,85.318244&amp;spn=0.021354,0.042272&amp;t=m&amp;z=14&amp;output=embed"></iframe><br /><small><a href="http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=+&amp;q=Kathmandu&amp;ie=UTF8&amp;hq=&amp;hnear=Kathmandu,+Central+Region,+Nepal&amp;ll=27.702871,85.318244&amp;spn=0.021354,0.042272&amp;t=m&amp;z=14" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+      </div>
+     * 
+     */
+    ?>
+
+    <?php echo $this->partial('blockListing/socialConnect.phtml', array("url" => $this->url)); ?>
+    <?php echo $this->partial('blockListing/otherLikes.phtml', array("otherlikes" => $this->otherlikes)); ?>
+    <?php echo $this->partial('blockListing/attractionList.phtml', array("relatedPackage" => $this->relatedPackage, 'thumbPath' => $this->thumbPath)); ?>
+
+    <?php /*
+    <div class="rightcontentbox">
+        <h2>Videos</h2>
+        <iframe style="width:20.5em; height:16.583em;" src="http://www.youtube.com/embed/PEKH6RGEYug" frameborder="0" allowfullscreen></iframe>
+    </div>
+     * 
+     */
+    ?>
+</div>
+<div class="clear eightpxseparator"></div>
+
+<!--******************************************* MAIN CONTENT ENDS *******************************-->
+
+<style type="text/css">
+    #demo-frame > div.demo { padding: 10px !important; }
+    #ui-datepicker-div{z-index:100!important;}
+    #book-link{
+        margin-right: 5px;
+        margin-top: 5px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+</style>
+
+<script type="text/javascript">		     	    
+    $(function() {
+        $('.link-tellafriend').fancybox({           
+            'type': 'iframe',
+            'width' : '50%',
+            'height' : '75%',
+            'autoScale' : false,
+            'transitionIn' : 'none',
+            'transitionOut' : 'none',
+
+            onComplete: function(e, i, d) {
+            }
+        }
+    ); 
+        /*
+         * Show detail itinerary event
+         */        
+        $('.itinerary-show-detail a').live('click', function(e) {
+            e.preventDefault();
+            var $ln = $(this);
+            //$(this).parents('.days-itinerary-detail').find('div.itinerary-desc').show('fast');
+            $(this).parents('.days-itinerary-detail').find('div.itinerary-desc').toggle('fast', function(te) {
+                var lnText = ('Hide Detail' == $ln.text()) ? 'Show Detail' : 'Hide Detail';
+                $ln.text(lnText);
+            });
+            return false;
+        });
+        
+        $( "#tabs, #related-tabs" ).tabs();
+        $( ".ui-state-default a" ).on('click',function(evt){
+            evt.preventDefault();
+            var link = $(this);
+            var tabs = $(this).attr('href');
+            
+            switch(tabs){
+                case '#overview':
+                    $('.ui-tabs-panel').addClass('ui-tabs-hide');
+                    $('.ui-tabs-nav li').removeClass('ui-tabs-selected ui-state-active');
+                    $('#overview').removeClass('ui-tabs-hide');
+                    $(link).parent().addClass('ui-tabs-selected ui-state-active');
+                    break;
+                case '#itinerary':
+                    if (! $.trim($('#itinerary').text()) ) {
+                        link.closest('#tabs').loadMask();
+                    }
+                    
+                    $.ajax({
+                        url:'/holidays/itinerary',
+                        data:'id='+ <?php echo $result['package_id'] ?>,
+                        success: function(res){
+                            $.unloadMask();
+                            $('#itinerary').html(res);
+                            $('.ui-tabs-panel').addClass('ui-tabs-hide');
+                            $('.ui-tabs-nav li').removeClass('ui-tabs-selected ui-state-active');
+                            $('#itinerary').removeClass('ui-tabs-hide');
+                            $(link).parent().addClass('ui-tabs-selected ui-state-active');
+                        }
+                    });
+                    break;
+                    /*   case '#gallery':
+                    $('.ui-tabs-panel').addClass('ui-tabs-hide');
+                    $('.ui-tabs-nav li').removeClass('ui-tabs-selected ui-state-active');
+                    $('#gallery').removeClass('ui-tabs-hide');
+                    $(link).parent().addClass('ui-tabs-selected ui-state-active');
+                    break;
+               
+                case '#testimonials':
+                    $('.ui-tabs-panel').addClass('ui-tabs-hide');
+                    $('.ui-tabs-nav li').removeClass('ui-tabs-selected ui-state-active');
+                    $('#testimonials').removeClass('ui-tabs-hide');
+                    $(link).parent().addClass('ui-tabs-selected ui-state-active');
+                    break;
+                    
+                case '#map':
+                    $('.ui-tabs-panel').addClass('ui-tabs-hide');
+                    $('.ui-tabs-nav li').removeClass('ui-tabs-selected ui-state-active');
+                    $('#map').removeClass('ui-tabs-hide');
+                    $(link).parent().addClass('ui-tabs-selected ui-state-active');
+                    break;*/
+                }
+            });
+            
+            $('.close-fixed').live('click',function(e) {
+                $(this).parent().css('display','none');
+            });
+        
+            $('.fixed-departure-dates').click(function() {
+                var $this = $(this);
+                var pid = $this.parent().find('.package-id').val();
+                var list = $this.parent().find('.fixed-dates-list');
+                $.ajax({
+                    url:'/holidays/getdeparturedates/',
+                    data: 'id='+pid,
+                    success: function(res){
+                        list.html(res);
+                        //list.css('display','block');
+                        $(list).toggle();
+                    }
+                });
+            });           
+           
+        
+        });       
+</script>

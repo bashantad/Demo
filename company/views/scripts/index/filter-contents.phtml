@@ -1,0 +1,9 @@
+<select class="form-select" id="content_id" name="content_id">
+    <option label="Select Company Type first" value="">--Select Content--</option>
+    <?php if($this->contents){
+        foreach($this->contents as $key=>$value){ ?>
+        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>    
+        <?php
+        }
+    }?>
+</select>

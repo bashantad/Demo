@@ -1,0 +1,325 @@
+
+<!--******************************************* ACTIVITIES STARTS *******************************-->
+<?php $this->headLink()->appendStylesheet($this->baseUrl() . '/css/booking.css'); ?>
+<?php
+$limitConfig = new Zend_Config_Ini(APPLICATION_PATH . DIRECTORY_SEPARATOR . "configs" . DIRECTORY_SEPARATOR . "element.ini", 'star_rating');
+$starvalue = "0," . implode(',', $limitConfig->star->rating->value->toArray());
+?>
+
+<?php
+$data = array();
+if (count($this->element['filtered']) > 0) {
+    foreach ($this->element['filtered'] as $res) {
+        $data[$res['name'] . "::::" . $res['element_category_id']][$res['content_id']] = $res;
+    }
+    ?>
+    <div id="leftmaincol">        
+        <div class="hotel-filter-wrapper"><h1>Filter Your Search</h1>
+            <div id="destination-filter-wrapper" class="filter-destination">
+                <div class="label">
+                    <span>Destination</span>
+                    <input type="text" id="destination-search" class="destination-search" value="" placeholder="Search" />
+                </div>
+                <div id="desinations-wrapper">
+                    <select class="form-select-destination" id="destinations" name="destinations" multiple="multiple" size="5">
+                        <?php foreach ($this->locations as $value) { ?>                                                    
+                            <option value="<?php echo $value->value ?>"><?php echo $value->text ?></option>
+                        <?php } ?>                        
+                    </select> 
+                </div>
+            </div>
+            <div id="star-rate-filter-wrapper" class="filter-hotel">
+                <div class="label">
+                    <span>Star Rating</span>
+                </div>                              
+                <div id="tags-wrapper">
+    <!--                    <select class="form-select-hotel" id="tags" name="tags" multiple="multiple" size="5">
+                    <?php // foreach ($this->tags as $value) { ?>                                                    
+                            <option value="<?php // echo $value->value                   ?>"><?php // echo $value->text                   ?></option>
+                    <?php // } ?>
+                    </select>                         -->
+                    <div id="sliderstar">
+                        <input type="text" id="star" name="star" value="<?php // echo $session['budget']               ?>" style="display:none">
+                        <div id="starslider"></div><div class="clear"></div>
+                        <div id='slider-value-star' class="hotel-search-slider-value"><?php // echo ($session['budget']) ? number_format($session['budget']) : 0;               ?></div>
+                        <div class="clear"></div>
+                        <input type="text" id="star-values" name="star-values" value="<?php echo $starvalue ?>" style="display:none">
+                    </div>
+                </div>
+            </div>
+            <div id="budget-filter-wrapper" class="filter-hotel-budget">
+                <div class="label">
+                    <span>Budget</span>
+                </div>                              
+                <div id="tags-wrapper">
+    <!--                    <select class="form-select-hotel" id="tags" name="tags" multiple="multiple" size="5">
+                    <?php // foreach ($this->tags as $value) { ?>                                                    
+                            <option value="<?php // echo $value->value                   ?>"><?php // echo $value->text                   ?></option>
+                    <?php // } ?>
+                    </select>                         -->
+                    <div id="sliderbudget">
+                        <input type="text" id="budget" name="budget" value="<?php // echo $session['budget']               ?>" style="display:none">
+                        <div id="budgetslider"></div><div class="clear"></div>
+                        <div id='slider-value-budget' class="hotel-search-slider-value">$<?php // echo ($session['budget']) ? number_format($session['budget']) : 0;               ?></div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="eightpxseparator1"></div>
+
+        <div class="hotels">
+            <div id="txt-available-options"><h2>Available Options</h2></div>
+            <?php echo $this->partial('blockListing/filtered-hotels.phtml', array("data" => $data, 'id' => $this->id, 'rijndael' => $this->rijndael)); ?>
+        </div>
+    </div>
+<?php } ?>
+
+<!--******************************************* ACTIVITIES ENDS *******************************--> 
+<div id="rightpanel">
+    <div class="rightcontentbox">
+        <h2>Suggested Services</h2>
+
+        <?php
+        foreach ($this->elementDetail as $dtl) {
+            $params = sprintf("company_id=%s&element_dtl_id=%s", $dtl->company_id, $dtl->element_dtl_id);
+            $cipherQuery = $this->rijndael->encrypt($params);
+            ?>
+
+            <div class="otherhotelslistwrapper">
+                <form action="<?php echo $this->siteUrl() . "/default/serviceprovider/book"; ?>" method="post" >
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $fn = '';
+                        if ($dtl->image_url) {
+                            $fn = end(explode('/', $dtl->image_url));
+                        }
+
+                        $thumbPath = 'uploads' . DS . 'element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . rawurlencode($fn);
+                        $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                        if (is_file($this->basePath() . DS . $thumbPath)) {
+                            $thumbUrl = sprintf("%s/uploads/element/thumbnails/120x120/images/%s", $this->baseUrl(), $fn);
+                        }
+                        //$dtlUrl = $this->siteUrl() . "/serviceprovider/detail/?q=$cipherQuery";
+                        $dtlUrl = "javascript:void(0);";
+                        ?>
+                        <a href="<?php echo $dtlUrl; ?>">
+                            <img height="70" width="70" src="<?php echo $thumbUrl; ?>"/>
+                        </a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                        <h3 class="right-title"><?php echo $dtl->description; ?></h3>
+                        <span class="holiday-caption-desc">Hotel: <?php echo ucwords($dtl->company_name); ?></span><br />
+                        <span class="holiday-caption-desc">Price: $<?php echo number_format($dtl->price, 2) ?></span><br />   
+                    </div>
+                    <div class="clear"></div>
+                    <?php $cip = $this->rijndael->encrypt('element-' . $dtl->element_dtl_id); ?>
+                    <div class="list-duration">
+                        <?php $cip = $this->rijndael->encrypt('element-' . $dtl->element_dtl_id); ?>
+                        <a class="back-button" href="<?php echo $this->siteUrl() . '/serviceprovider/book/' . $cip . '.html'; ?>" >Book Now</a>
+                    </div>
+                </form>
+            </div>
+        <?php } ?>  
+    </div>
+</div>
+<div class="clear"></div>
+<div class="eightpxseparator"></div>
+
+<!-- TOP SELLING HOLIDAYS CAROUSIL SCRIPT -->
+<script type="text/javascript" src="/js/jquery.simpleMultiSelect.js"></script>
+<script type="text/javascript">
+    function number_format(number,decimals,dec_point,thousands_sep){var n=!isFinite(+number)?0:+number,prec=!isFinite(+decimals)?0:Math.abs(decimals),sep=(typeof thousands_sep==='undefined')?',':thousands_sep,dec=(typeof dec_point==='undefined')?'.':dec_point,s='',toFixedFix=function(n,prec){var k=Math.pow(10,prec);return''+Math.round(n*k)/k;};s=(prec?toFixedFix(n,prec):''+Math.round(n)).split('.');if(s[0].length>3){s[0]=s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g,sep);}
+        if((s[1]||'').length<prec){s[1]=s[1]||'';s[1]+=new Array(prec-s[1].length+1).join('0');}
+        return s.join(dec);}
+    
+    $(document).ready(function() {
+        $('select#destinations, select#tags').simpleMultiSelect({
+            classesOnly : true,
+            pseudoSelect : 'destination-select-box', 
+            selected : 'destination-select',
+            unselected : 'destination-unselect'
+        });
+        
+        /**
+         * Destination search
+         */
+        var dest = new Array();
+        $('.filter-destination').find('.destination-select-box').children().each(function(k,v) {
+            var obj = {};
+            var $this = $(this);
+            obj.node = $this;
+            obj.text = $this.text().toLowerCase();
+            dest[k] = obj;
+        });
+        $('#destination-search').on('keyup', function(e) {
+            //var code = (e.keyCode ? e.keyCode : e.which);
+            var str = $.trim($(this).val());
+            $.each(dest, function(k,v) {
+                if(v.text.search(str) != -1) {
+                    v.node.show();
+                }
+                else {
+                    v.node.hide();
+                }
+            });
+        });
+        
+        //        $('.destination-select, .destination-unselect').on('click', function() {
+        //            var destinations = $('select#destinations').val();
+        //            var tags = $('select#tags').val();
+        //            var dids='', tids='';
+        //            if (destinations) {
+        //                $.each(destinations, function(k,v) {
+        //                    dids = dids + v + ':';
+        //                });
+        //            }
+        //            if (tags) {
+        //                $.each(tags, function(k,v) {
+        //                    tids = tids + v + ':';
+        //                });
+        //            }
+        //            dids = dids ? dids.substr(0, dids.length-1) : '';
+        //            tids = tids ? tids.substr(0, tids.length-1) : '';
+        //            
+        //            var url = '/hotels/filtered/tags/'+tids+'/destination/'+dids;
+        //            $('.activities-scrollwrapper').each(function(k,v) {
+        //                $(this).loadMask();
+        //            });
+        //            $.ajax({
+        //                url: url, 
+        //                dataType: 'json',
+        //                success: function(res) {                    
+        //                    $(".hotels").html(res.html);
+        //                    $.unloadMask();
+        //                },
+        //                error: function(e) {
+        //                    $.unloadMask();
+        //                }
+        //            });
+        //        });
+
+        $('.destination-select, .destination-unselect').on('click', function() {
+            
+            $('.activities-scrollwrapper').each(function(k,v) {
+                $(this).loadMask();
+            });
+            
+            getHotelFilteredData()
+        });
+        
+        $( "#budgetslider" ).slider({
+            //range: "min",
+            value: $( "#budget" ).val(),
+            min: 0,
+            max: 2000,
+            slide: function( event, ui ) {
+                $( "#slider-value-budget" ).html("$" + number_format(ui.value));
+                $( "#budget" ).val(ui.value);
+            },
+            change: function(event,ui){
+                $('.activities-scrollwrapper').each(function(k,v) {
+                    $(this).loadMask();
+                });
+                if($("#rightpanel").length){
+                    $("#rightpanel").loadMask();
+                }
+                getHotelFilteredData();
+            }
+        });
+        $( "#slider-value-budget" ).val("$" + $("#budgetslider" ).slider( "value" ) );
+        
+        $( "#starslider" ).slider({
+            //range: "min",
+            value: $( "#star" ).val(),
+            min: 1,
+            max: 5,
+            slide: function( event, ui ) {
+                $( "#slider-value-star" ).html(number_format(ui.value) + " Star");
+                $( "#star" ).val(ui.value);
+            },
+            change: function(event,ui){
+                $('.activities-scrollwrapper').each(function(k,v) {
+                    $(this).loadMask();
+                });
+                if($("#rightpanel").length){
+                    $("#rightpanel").loadMask();
+                }
+                        
+                getHotelFilteredData();
+            }
+        });
+        
+        $( "#slider-value-star" ).val($("#starslider" ).slider( "value" ) +" Star" );
+
+        function getHotelFilteredData(){
+            var budget = $( "#budget" ).val();
+            
+            var destinations = $('select#destinations').val();
+            var tags = $( "#star" ).val();
+            var dids='', tids='';
+            if (destinations) {
+                $.each(destinations, function(k,v) {
+                    dids = dids + v + ':';
+                });
+            }
+            if (tags) {
+                $.each(tags, function(k,v) {
+                    tids = tids + v + ':';
+                });
+            }
+            dids = dids ? dids.substr(0, dids.length-1) : '';
+            tids = tids ? tids.substr(0, tids.length-1) : '';
+            
+            var url = '/hotels/filtered/tags/'+tids+'/destination/'+dids+'/budget/'+budget;
+            var noSuggestions='';
+            $.ajax({
+                url: url, 
+                dataType: 'json',
+                success: function(res) {                    
+                    $(".hotels").html(res.html);
+                    $("#rightpanel").replaceWith(res.suggestions);
+                    if(!res.size){
+                        noSuggestions = '<div class="note-wrapper">'
+                                        +'<span class="note">'
+                                        +'<div class="notification-large"><strong> &nbsp;NO SERVICES AVAILABLE. </strong><br></div>'
+                                        +'Please choose from our recommended list of services.</span></div>'
+                        $(".rightcontentbox").prepend(noSuggestions);
+                    }
+                    $.unloadMask();
+                },
+                error: function(e) {
+                    $.unloadMask();
+                }
+            });
+            
+            //            $.ajax({
+            //                url:'hotel/filtered-detail/',
+            //                dataType: 'json',
+            //                data: qstr,
+            //                success: function(res){
+            //                    $.unloadMask();
+            //                    $('#listitemswrapper').html(res.html);
+            //                    $('#holidays-count').html(res.count);
+            //                    $('#total-count').val(res.count)
+            //            
+            //                    if($('.readmore').is('.hidden')){
+            //                        $('.readmore').removeClass('hidden');
+            //                    }
+            //                    if(parseInt(res.count) <= parseInt($('#pagination-offset').val())){
+            //                        $('.readmore').addClass('hidden');
+            //                    }
+            //                    else{
+            //                        $('.readmore').removeClass('hidden');
+            //                    }
+            //                },
+            //                error:function(){
+            //                    $.unloadMask();
+            //                }
+            //            });
+        }
+    });
+    
+</script>
+

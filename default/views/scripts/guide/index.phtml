@@ -1,0 +1,98 @@
+<?php echo $this->partial('blockListing/guide.phtml', array('guideDetails' => $this->guideDetails, 'pcids' => $this->breadcrumb['pcid'])); ?>
+
+<div id="guide-right-panel">
+    <?php if ($this->breadcrumb['breadcrumb']) { ?>
+        <div id="breadcrumb-guid">
+            <?php print $this->breadcrumb['breadcrumb']; ?>
+        </div>
+    <?php } ?>
+    <div class="guide-content">
+        <h2><?php echo $this->contentDetails['heading'] ? $this->contentDetails['heading'] : "THE GUIDE"; ?></h2>
+        <?php
+        if ($this->subMenuDetails) {
+            $siteUrl = $this->siteUrl();
+            $result = $this->subMenuDetails;
+            foreach ($result as $key => $item) {
+                $params = sprintf("%s", $item['content_id']);
+                $rijndael = new NepalAdvisor_Rijndael_Encrypt();
+                $cipherQuery = $rijndael->encrypt($params);
+                $title = str_replace('?', '', $item['heading']);
+                $linkUrl = sprintf("%s/guide/%s/%s.html", $siteUrl, $title, $cipherQuery);
+                ?> 
+                <p><a class="guide-anchors" href="<?php echo $linkUrl; ?>" id="<?php echo $item['content_id']; ?>"><?php echo $item['heading']; ?></a></p>  
+                <?php
+                foreach ($item as $key => $items) {
+                    if ($key == 'children') {
+                        $printUrl = listToUl($items, $siteUrl);
+                        echo $printUrl;
+                    }
+                }
+            }
+        } else {
+            $img = sprintf("%s/themes/default/images/plan-your-holiday.png", $this->baseUrl());
+            $holidaysLink = sprintf("%s/holidays", $this->siteUrl());
+            echo $this->contentDetails['description'] ? $this->contentDetails['description'] :
+                    "<p>
+	<strong><a href =" . $holidaysLink . "><img src = " . $img . " alt = 'Plan your holiday' title = 'Plan your holiday'> </a><br />
+        to Nepal through the travel guide displayed here.<br />
+	Some interesting Facts on Nepal:</strong></p>
+<ul>
+	<li>Lord Buddha also known as the &quot;Light of Asia&quot; was born in Lumbini, Nepal.</li>
+	<li>World&#39;s highest peak Mt. Everest (8,848m.) is in Nepal</li>
+	<li>8 out of 10 World&#39;s highest peaks are in Nepal</li>
+	<li>Nepal has the elevation from 8848 to 60m. within the mere 150kms</li>
+	<li>The Annapurna region was voted one of the top 10 best trekking places on earth</li>
+	<li>Nepal has the densest concentration of World Heritage Sites and Kathmandu valley alone has 7&nbsp;&nbsp; World Heritage Cultural sites within a radius of 15 kilometers?</li>
+	<li>Nepal is the only nation with non-quadrilateral flag?&nbsp;</li>
+	<li>Nepal is a must visit place at least once in your life time.</li>
+</ul>
+
+";
+        }
+        ?>
+
+    </div>
+
+</div>
+<div class='clear'></div>
+
+<div>
+    <?php
+
+    function listToUl($arr, $siteUrl)
+    {
+        $html = '<ul class="listTab">' . PHP_EOL;
+        foreach ($arr as $v) {
+            $url = ($v['heading'] != '') ? $v['heading'] : "#";
+            $params = sprintf("%s", $v['content_id']);
+            $rijndael = new NepalAdvisor_Rijndael_Encrypt();
+            $title = $v['heading'];
+            $cipherQuery = $rijndael->encrypt($params);
+            //$linkUrl = $siteUrl . 'index/id/' . $cipherQuery;
+            //$title .= $v['parent_id'] . ':';
+            $linkUrl = sprintf("%s/guide/%s/%s.html", $siteUrl, $title, $cipherQuery);
+            if ($url == '#') {
+                $html .= "<li class=\"first-tab\"><a class=\"menutitle-link\" href=\"$linkUrl\">" . $v['heading'] . "</a>";
+            } else {
+                $html .= "<li><a class=\"menutitle-link\" href=\"$linkUrl\">" . $v['heading'] . "</a>";
+            }
+            if (array_key_exists('children', $v)) {
+                $html .= listToUl($v['children'], $siteUrl);
+            }
+            $html .= '</li>' . PHP_EOL;
+        }
+        $html .= '</ul>' . PHP_EOL;
+
+        return $html;
+    }
+    ?>
+</div> 
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#maincontent').addClass('guide-background');
+        if($(document).height() < 800){           
+            $('#suggestedinspirations').hide();
+        }
+    });
+</script>

@@ -1,0 +1,345 @@
+<?php
+if (empty($this->results))
+    return;
+?>
+
+<!-- PLACES GALLERY -->
+<script type="text/javascript" src="<?php printf("%s/js/jquery.fancybox-1.3.4.js", $this->baseUrl()); ?>"></script>
+<script src="<?php echo $this->theme('jquery-components/ui/jquery.ui.widget.js') ?>"></script>
+<script src="<?php echo $this->theme('jquery-components/ui/jquery.ui.mouse.js') ?>"></script>
+<script src="<?php echo $this->theme('jquery-components/ui/jquery.ui.tabs.js') ?>"></script>
+<link href="<?php echo $this->theme('jquery-components/themes/base/jquery.ui.tabs.css') ?>" rel="stylesheet" type="text/css">
+<link href="<?php echo $this->theme('jquery-components/themes/base/jquery.ui.base.css') ?>" rel="stylesheet" type="text/css">
+<link href="<?php printf("%s/css/jquery.fancybox-1.3.4.css", $this->baseUrl()); ?>" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="<?php echo $this->theme('js/jquery.ad-gallery.js') ?>"></script>
+<script type="text/javascript">
+    $(function() {        
+        var galleries = $('.ad-gallery').adGallery();
+        $('#switch-effect').change(
+        function() {
+            galleries[0].settings.effect = $(this).val();
+            return false;
+        }
+    );
+        $('#toggle-slideshow').click(
+        function() {
+            galleries[0].slideshow.toggle();
+            return false;
+        }
+    );
+    });
+</script>
+
+<div id="leftmaincol">    
+    <?php
+    $result = $this->results;
+    $title = urlencode($result['heading']);
+    $cipher = $this->rijndael->encrypt($result['content_id']);
+    $session = Zend_Registry::get('defaultsession');
+    $likeUrl = sprintf("%s/activities/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+    $likeClass = 'pk-like';
+    $likeImageClass = 'pk-img-like';
+    $likeBtn = 'themes/default/themeimages/ic-like.png';
+    $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+    $pklikeAltText = 'Like';
+    $pklikeWords = 'Like';
+    if ($session->userlikecontent[$this->id]) {
+        $likeUrl = sprintf("%s/activities/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+        $likeClass = 'pk-unlike';
+        $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+        $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+        $pklikeAltText = 'Unlike';
+        $pklikeWords = 'Unlike';
+        $likeImageClass = 'pk-img-unlike';
+    }
+    ?>    
+    <h1><?php echo stripslashes($result['heading']); ?></h1>
+
+    <div id="gallery" class="ad-gallery">
+        <div class="ad-image-wrapper">
+        </div>
+        <div class="ad-controls">
+        </div>
+        <div class="ad-nav">
+            <div class="ad-thumbs">
+                <ul class="ad-thumb-list">                   
+                    <li> 
+                        <?php
+                        $ipathThumb = 'uploads' . DS . 'thumbnails' . DS . '40x40' . DS . 'images' . DS . $result['file_name'];
+                        $largeImage = 'uploads' . DS . 'thumbnails' . DS . '700x400' . DS . 'images' . DS . $result['file_name'];
+                        $primaryThumb = $ipathThumb;
+
+                        switch (1) {
+                            case '':
+                            case NULL:
+                            case (!is_file($this->basePath() . DS . $ipathThumb)) :
+                                $primaryThumb = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                                $largeImage = sprintf("%s/images/no-image/700x400.jpg", $this->baseUrl());
+                                break;
+                            default:
+                                $primaryThumb = $this->baseUrl() . '/uploads/thumbnails/40x40/images/' . rawurlencode($result['file_name']);
+                                $largeImage = $this->baseUrl() . '/uploads/thumbnails/700x400/images/' . rawurlencode($result['file_name']);
+                        }
+                        ?>
+                        <a href="<?php echo $largeImage; ?>">
+                            <img src="<?php echo $primaryThumb; ?>" title="<?php echo $result['heading']; ?>" alt="No Image" class="image<?php echo $result['content_id'] ?>"/>
+                        </a>
+                    </li>
+                    <?php
+                    if (array_key_exists('images', $result)) {
+                        $totImgCnt = sizeof($result['images']);
+                        foreach ($result['images'] as $image) {
+                            $ipath = 'uploads' . DS . 'thumbnails' . DS . '700x400' . DS . 'images' . DS . $image['file_name'];
+                            $imageUrl = $this->baseUrl() . '/uploads/thumbnails/700x400/images/' . rawurlencode($image['file_name']);
+                            $thumbUrl = $this->baseUrl() . '/uploads/thumbnails/40x40/images/' . rawurlencode($image['file_name']);
+
+                            if (!is_file($this->basePath() . DS . $ipath)) {
+                                $imageUrl = sprintf("%s/images/no-image/700x400.jpg", $this->baseUrl());
+                                $thumbUrl = sprintf("%s/images/no-image/40x40.jpg", $this->baseUrl());
+                            }
+                            if ($thumbUrl == $primaryThumb || $totImgCnt == 1) {
+                                continue;
+                            }
+                            ?>
+                            <li>
+                                <a href="<?php echo $imageUrl; ?>" title="<?php echo rawurlencode($image['file_name']); ?>">
+                                    <img src="<?php echo $thumbUrl; ?>" title ="<?php echo $image['caption']; ?>"alt="<?php echo $image['description'] ?>" />
+                                </a>
+                            </li>   
+                            <?php
+                        }
+                    }
+                    ?>
+
+                </ul>
+            </div>
+        </div>
+    </div>				
+
+    <div class="eightpxseparator"></div>
+    <div id="activities-description">     
+        <?php //print "<pre>";print_r($result['tabs']);exit;  ?>
+        <div id="tabs">
+            <?php
+            $overviewTabHtml = sprintf("<li><a href='#tab-%s'>Overview</a></li>", $result['content_id']);
+            $rating = $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $this->rating, 'type' => 'content_rating', 'table' => '', 'id' => $result['content_id'])));
+            $overviewRatings = "<div id='content-ratings'><span class='fivestar-ratings'>{$rating}</span></div>";
+            $reviews = $this->partial('review/review.phtml', array('type' => 'content_review', 'id' => $result['content_id'], 'data' => $this->review));
+            $likes = "<div class ='likes-bar'>
+                      <a class='link-button hover-icon {$likeClass} {$likeImageClass}' href='{$likeUrl}'>
+                      <span class='like-phrase'>{$pklikeWords}</span>
+                      <img border='0' alt='{$pklikeAltText}' src='{$this->theme($pkLikeBtn)}'>                         
+                     </a>       
+                    </div>";
+            $overviewTabContentHtml = sprintf(
+                    "<div id='tab-%s'> \n" .
+                    "<p>%s%s%s</p> \n" .
+                    "<div id='content-review-wrapper'>%s</div>" .
+                    "</div>", $result['content_id'], $likes, $overviewRatings, $result['description'], $reviews
+            );
+            $leafTabHtml = "";
+            $leafTabContentHtml = "";
+            ?>
+            <?php
+            if (array_key_exists('tabs', $result)) {
+                foreach ($result['tabs'] as $tabs) {
+                    ?> 
+                    <?php
+                    $leafTabHtml .= sprintf("<li><a href='#tab-%s'>%s</a></li>\n", $tabs['tab_id'], $tabs['tab_heading']);
+                    $leafTabContentHtml .= sprintf(
+                            "<div id='tab-%s'> \n" .
+                            "<p>%s</p>" .
+                            "</div>", $tabs['tab_id'], $tabs['tab_description']
+                    );
+                    ?>
+                    <?php
+                }
+            }
+            ?> 
+            <?php
+            printf("<ul>%s \n %s</ul>", $overviewTabHtml, $leafTabHtml);
+            print $overviewTabContentHtml . "\n" . $leafTabContentHtml;
+            ?>            
+        </div>        
+    </div>    
+</div>
+
+<div id="rightpanel">
+    <?php echo $this->partial('blockListing/socialConnect.phtml', array("url" => $this->url)); ?>
+    <!--<div id="rightpanel-utilitybar"> -->
+    <div class="rightcontentbox">  
+        <?php
+        $cipherQuery = '';
+        if (count($this->results) > 0) {
+            $params = sprintf("%s", $this->results['content_id']);
+            $rijndael = new NepalAdvisor_Rijndael_Encrypt();
+            $cipherQuery = $rijndael->encrypt($params);
+            printf("<div class='find-holidays-btn'><a href=\"%s/default/holidays/selected/?cid=%s&defaultTag=Y\">Find Holidays for " . stripslashes($result['heading']) . "</a></div>", $this->siteUrl(), $cipherQuery);
+        }
+        ?>
+
+    </div>
+
+    <?php /*
+      <div class="rightcontentbox">
+      <?php
+      $keyword = "";
+      $keywords = explode(' ', trim($result['heading']));
+      foreach ($keywords as $word) {
+      if ($word) {
+      $keyword .= $word . '+';
+      }
+      }
+      $keyword .= 'nepal';
+      $mapSrc = sprintf("http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=+&amp;q=%s&amp;ie=UTF8&amp;spn=0.021354,0.042272&amp;t=m&amp;z=10&amp;iwloc=&amp;iwstate1=&amp;addr=&amp;output=embed", $keyword);
+      ?>
+      <iframe width="270" height="310" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php print $mapSrc; ?>"></iframe>
+      <br />
+      <small><a href="http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=+&amp;q=Kathmandu&amp;ie=UTF8&amp;hq=&amp;hnear=Kathmandu,+Central+Region,+Nepal&amp;ll=27.702871,85.318244&amp;spn=0.021354,0.042272&amp;t=m&amp;z=14" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+      </div>
+     * 
+     */
+    ?>
+    <?php if (count($this->element) > 0 || count($this->datas['search']) > 0) { ?>
+        <div class="rightcontentbox">
+            <?php
+            echo $this->partial('blockListing/relatedTabs.phtml', array('element' => $this->element, 'datas' => $this->datas, 'rijndael' => $this->rijndael, 'cipherQuery' => $cipherQuery));
+            ?>
+            <!--            <div id="related-tabs">
+                            <ul>
+                                <li><a href="#related-attractions">Related <?php print ucwords(Zend_Controller_Front::getInstance()->getRequest()->getControllerName()); ?></a></li>
+                                <li><a href="#related-packages">Related Holidays</a></li>
+                            </ul>
+                            <div id="related-attractions">
+            <?php foreach ($this->element as $key => $value) {
+                ?>
+                                                                <div class ="attractions">
+                <?php
+                $thumb = 'uploads' . DS . 'thumbnails' . DS . 'images' . DS . rawurlencode($value['file_name']);
+                if (!is_file($this->basePath() . DIRECTORY_SEPARATOR . $thumb)) {
+                    $thumb = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                } else {
+                    $thumb = '/uploads/thumbnails/images/' . rawurlencode($value['file_name']);
+                    $thumb = sprintf("%s/%s", $this->baseUrl(), $thumb);
+                }
+                ?>
+                                                                    <div class ="attractions-img">
+                                                                        <img height="70" width="70" src="<?php echo $thumb ?>" alt="<?php echo $value['heading'] ?>" align="left" />
+                                                                    </div>
+                                                                    <div class ="attractions-content">
+                <?php
+                $title = trim(urlencode($value['heading']));
+                $id = $value['content_id'];
+                $catId = $value['element_category_id'];
+                $cipher = $this->rijndael->encrypt($id . '-' . $catId);
+                ?>
+                                                                        <h3 class="right-title"><a href="<?php printf("%s/activities/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>"><?php echo trim($value['heading']) ?></a></h3>
+                <?php
+                //print"<pre>";print_r($this);print"</pre>";
+                $outputText = $this->wordLimiter(strip_tags($value['three_line_desc']), 100);
+                print $outputText['text'];
+                ?>
+                                        
+                                        
+                                                                    </div>
+                                                                    <div class ="clear more-inspiration"><?php if ($outputText['isTrimmed']) : ?>
+                                                                                                        <a href="<?php printf("%s/activities/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>"><img src="<?php echo $this->theme('themes/default/themeimages/inspiration-btn-more.jpg'); ?>" /></a>
+                <?php endif; ?></div>
+                                                                </div>
+                                        
+            <?php } ?>     
+            
+                                <a href="/activities">more activities...</a>	  
+                            </div>
+                            <div id="related-packages">
+            <?php
+            if (array_key_exists("search", $this->datas)) {
+                foreach ($this->datas['search'] as $data) {
+                    ?>
+                                                                                                <div class ="attractions">
+                    <?php
+                    $title = trim($data->title);
+                    $cipher = $this->rijndael->encrypt($data->package_id);
+                    $imagePath = 'package' . DS . 'thumbnails' . DS . 'images' . DS . $data->file_name;
+                    if (!is_file($this->basePath() . DIRECTORY_SEPARATOR . $imagePath)) {
+                        $imagePath = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                    } else {
+                        $thumb = 'package/thumbnails/images/' . $data->file_name;
+                        $imagePath = sprintf("%s/%s", $this->baseUrl(), $thumb);
+                    }
+                    ?>
+                                                                                                    <div class ="attractions-img">
+                                                                                                        <a href="<?php printf("%s/holidays/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher) ?>"><img alt="" width="70" height="70" src="<?php echo $imagePath ?>" /></a>
+                                                                                                    </div>
+                                                                                                    <div class ="attractions-content">                           
+                                                                                                        <h3 class="right-title"><a href="<?php printf("%s/holidays/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher) ?>"><?php echo $title; ?></a></h3>
+                    <?php
+                    $outputText = $this->wordLimiter(strip_tags($data->description), 100);
+                    print $outputText['text'];
+                    ?>
+                                                                    
+                                                                    
+                                                                                                    </div>
+                                                                                                    <div class ="clear more-inspiration"><?php if ($outputText['isTrimmed']) : ?>
+                                                                                                                                        <a href="<?php printf("%s/holidays/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher) ?>"><img src="<?php echo $this->theme('themes/default/themeimages/inspiration-btn-more.jpg'); ?>" /></a>
+                    <?php endif; ?></div>
+                                                                                                </div>
+                <?php }
+                ?>     
+                                        
+                                                            <a href="<?php printf("%s/default/holidays/selected/?cid=%s", $this->siteUrl(), $cipherQuery) ?>">more holidays...</a>	  
+                <?php
+            }else {
+                echo "No Records(0)";
+            }
+            ?>
+                            </div>
+                        </div>-->
+        </div>
+    <?php } ?>
+
+    <?php /*
+      <div class="rightcontentbox">
+      <h2>Videos</h2>
+      <iframe style="width:20.5em; height:16.583em;" src="http://www.youtube.com/embed/PEKH6RGEYug" frameborder="0" allowfullscreen></iframe>
+      </div>
+     * 
+     */
+    ?>
+</div>
+<div class="clear eightpxseparator"></div>
+
+
+<!--******************************************* MAIN CONTENT ENDS *******************************-->
+
+<style>
+    #demo-frame > div.demo { padding: 10px !important; }
+    #ui-datepicker-div{z-index:100!important;}	
+</style>
+
+
+<script type="text/javascript">
+    <!-- We only want the thunbnails to display when javascript is disabled -->
+			     	    
+    $(function() {
+        $( "#tabs, #related-tabs" ).tabs();
+        var customizeElement = {};
+        $('.find-holidays-btn a').fancybox({
+            //$customize-itenary = $(this);
+            showActivity: true,
+            centerOnScroll: true,
+            onComplete: function(element, index, fb) {
+                customizeElement.link = $(element);
+            },
+            ajax: {}
+        });
+    });
+
+</script>
+
+
+
+
+
+

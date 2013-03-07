@@ -1,0 +1,40 @@
+<h3> Choose Service </h3>
+<table id="customize-itinerary-transport" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>By</th>
+            <th>Price </th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php if($this->results) : ?>
+        <?php foreach ($this->results as $cnt=>$data): ?>
+            <?php $class = ($this->element_dtl_id == $data->element_dtl_id) ? 'class="selected-row"' : ' '; ?>
+            <tr <?php echo $class; ?> >
+                <?php
+                $altCls = ($cnt % 2 == 0) ? 'even' : 'odd alt';
+                ?>
+                <td class="<?php print $altCls; ?>">
+                    <?php echo $data->name; ?>
+                </td>
+                <td class="<?php print $altCls; ?>">
+                    <input class="element-detail-id"type="hidden" name="element_dtl_id" value="<?php echo $data->element_dtl_id; ?>" />
+                    <?php echo $data->service_class . " "; ?>
+                </td>
+                <td class="<?php print $altCls; ?>">
+                    <?php echo $data->service_name; ?>
+                </td>
+                <td class="<?php print $altCls; ?>">
+                    $<span class="price-per-element"><?php echo $data->price; ?></span>
+                </td>
+                <td class="<?php print $altCls; ?>"><input type="submit" name="button" class="choose-transport"value="Choose" /></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <tr><td colspan="5">No Records Found.</td></tr>
+    <?php endif; ?>
+    </tbody>
+</table>

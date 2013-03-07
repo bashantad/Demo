@@ -1,0 +1,95 @@
+<?php
+$config = new Zend_Config_Ini(APPLICATION_PATH . DIRECTORY_SEPARATOR . "configs" . DIRECTORY_SEPARATOR . "transaction.ini", 'production');
+
+switch ($this->transaction['booking_type']) {
+    case 'ELEMENT':
+        $url = '';
+        break;
+    case 'PACKAGE':
+        $url = "/package/index/detail/id/{$this->transaction['package_id']}";
+        break;
+    case 'EVENT':
+        $url = '';
+        break;
+}
+?>
+
+<div id="package-configuration-main">
+    <?php if ($this->transaction['payment_status'] == $config->paymentstatus->pending): ?>
+        <h1>Payment Amount Confirmation</h1>
+    <?php elseif ($this->transaction['payment_status'] == $config->paymentstatus->processing): ?>
+        <h1>Payment Confirmation</h1>
+    <?php endif; ?>
+    <div id="checkout-detail">
+        <table border="0" cellspacing="0" cellpadding="4" width="100%">
+            <thead>
+                <tr>
+                    <th class="description">Description</th>
+                    <th class="quantity">No. of Pax</th>
+                    <th class="amount">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="description">
+                        <div>
+                            <h3><?php echo $this->transaction['item_name'] ?></h3>
+                            <?php if ($url): ?>
+                                <span><a href="<?php echo $url; ?>" class="itinery-detail">Itinery detail</a></span>
+                            <?php endif; ?>
+                        </div>
+                    </td>
+                    <td class="quantity"><?php echo $this->transaction['quantity'] ?></td>
+                    <td class="amount">USD <?php echo number_format($this->transaction['gross_amount'], 2); ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <?php if ($this->transaction['payment_status'] == $config->paymentstatus->pending): ?>
+        <div id="checkout-payment-info">
+            <div id="itinerary-detail-list" style="display: none;"></div>
+            <fieldset class ="admin-fieldset">
+                <legend>Approve the amount given below.</legend>
+                <?php print $this->form; ?>
+            </fieldset>
+
+        </div>
+    <?php elseif ($this->transactionfile && $this->transaction['payment_status'] == $config->paymentstatus->processing): ?>
+        <fieldset class ="admin-fieldset">
+            <legend>List of Reciept.</legend>
+            <ul id ="reciept-file-list">
+                <?php foreach ($this->transactionfile as $key => $val): ?>
+                    <li id="filelist-<?php echo $val['file_id'] ?>"><a href="<?php echo $this->siteUrl() ?>/payment/receipt/<?php echo $this->rijndael->encrypt($val['file_id']) ?>"><?php echo $val['file_name'] ?></a> </li>
+                <?php endforeach; ?>
+            </ul>
+            <?php print $this->form; ?>
+        </fieldset>
+    <?php endif; ?>
+</div>
+
+<style>
+    .admin-fieldset{
+        border: 1px solid #DDD;
+        margin-bottom: 1em;
+        padding: 0.5em;
+    }
+
+    .confirm-amount label{
+        margin-right: 10px; 
+    }
+</style>
+
+<script>
+    $('.itinery-detail').click(function(e){
+        e.preventDefault();
+        var $this = $(this);
+        var link = $this.attr('href');
+        $.ajax({
+            url:link,
+            success: function(res){
+                $('#itinerary-detail-list').html(res);
+                $('#itinerary-detail-list').slideToggle();
+            }
+        });
+    });
+</script>

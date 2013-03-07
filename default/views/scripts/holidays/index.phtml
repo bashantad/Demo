@@ -1,0 +1,447 @@
+<style type="text/css">
+    #sorted-by {
+        float: left;
+        padding: 0.5em;
+        width: 6.25em;
+    }
+    .listsort {
+        width: 102px;
+    }
+    .listsort .icon-edit {
+        padding-left: 0 !important;
+    }
+    .fixed-dates-list {
+        background: none repeat scroll 0 0 #FFFFFF;
+        display: none;
+        left: 180px;
+        padding: 5px 10px;
+        position: absolute;
+        top: 1px;
+        width: 150px;
+    }
+    .fixed-dates-list ul{
+        padding: 0 10px;
+        margin: 0;
+    }
+</style>
+<script src="<?php echo $this->theme('js/common.js') ?>"></script>
+<script type="text/javascript" src="<?php printf("%s/js/utility.js", $this->baseUrl()); ?>"></script>	
+<?php
+$session = Zend_Registry::get('defaultsession');
+//echo "<pre>"; print_r($_SESSION['defaultsession']);echo "</pre>";
+?>
+<h1>Holidays Suggested for You</h1>
+<?php
+$totalResultCount = isset($this->datas['total']) ? $this->datas['total'] : 0;
+if (!$totalResultCount) {
+    if (array_key_exists('search', $this->datas) && is_array($this->datas['search'])) {
+        $totalResultCount = count($this->datas['search']);
+    }
+    if (array_key_exists('recommended', $this->datas) && is_array($this->datas['recommended'])) {
+        $totalResultCount = count($this->datas['recommended']);
+    }
+}
+?>
+
+<?php
+$sessPlace = isset($session->userdata['places']) ? $session->userdata['places'] : '';
+$sessActivities = isset($session->userdata['activities']) ? $session->userdata['activities'] : '';
+$sessBudget = isset($session->userdata['budget']) ? $session->userdata['budget'] : '';
+$sessDuration = isset($session->userdata['duration']) ? $session->userdata['duration'] : '';
+switch (true) {
+    case ($sessPlace):
+    case ($sessActivities):
+    case ($sessBudget > 0):
+    case ($sessDuration):
+    case ($totalResultCount):
+        printf("<div class='result-text'><span id='holidays-count'>%s</span> Matches Found</div>", $totalResultCount);
+        break;
+}
+?>
+
+<?php
+$op = isset($session->userdata['operation']) ? $session->userdata['operation'] : 'ASC';
+$fieldText = '';
+if (isset($session->userdata['field'])) {
+    switch ($session->userdata['field']) {
+        case 'location':
+            $fieldText = 'Location';
+            break;
+        case 'no_of_days':
+            $fieldText = 'Duration';
+            break;
+        case 'total_cost':
+            $fieldText = 'Budget';
+            break;
+        case 'difficulty_level':
+            $fieldText = 'Difficulty';
+            break;
+        default:
+            break;
+    }
+}
+?>
+
+<style type="text/css">
+    .sort-desc .s-btn-downarrow {
+        background: url("<?php echo $this->theme("images/menu_uparrow.png"); ?>")  no-repeat scroll 9px center transparent;
+    }
+    .sort-asc .s-btn-downarrow {
+        background: url("<?php echo $this->theme("/images/menu_downarrow.png"); ?>") no-repeat scroll 9px center transparent;
+    }
+</style>
+
+<div class="listsort <?php print 'sort-' . strtolower($op); ?>">
+    <div class="ico-wrapper">
+        Sort by &nbsp;|<a href="#" class="easyui-splitbutton" menu="#menu-sort" iconCls="icon-edit"></a>
+        <a href="#" class="easyui-linkbutton" plain="true" iconCls="icon-help">
+            <span class="l-btn-left">
+                <span class="l-btn-text icon-edit"><span class="s-btn-downarrow">&nbsp;</span></span>
+            </span>
+        </a>
+    </div>
+    <div id="menu-sort" class="menu-top menu" style="display:none;">
+        <div id="no_of_days" class="sort-item menu-item">
+            <div class="menu-text">Duration</div>
+        </div>
+        <div id="total_cost" class="sort-item menu-item">
+            <div class="menu-text">Budget</div>
+        </div>	
+        <div id="difficulty_level" class="sort-item menu-item">
+            <div class="menu-text">Difficulty</div>
+        </div>												
+    </div>
+</div>
+
+<?php
+$sortClass = '';
+if (isset($session->userdata['field'])) {
+    if ($session->userdata['field'] && $fieldText) {
+        $sortClass = $session->userdata['field'] . ' ' . $op;
+    }
+}
+?>
+
+<div class="<?php print $sortClass; ?>" id="sorted-by"><?php print $fieldText ?></div>
+
+<div class="clear"></div>
+<div id="listitemswrapper">
+    <?php
+    if ($this->datas['search']):
+        foreach ($this->datas['search'] as $data):
+            $title = trim($data->title);
+            $cipher = $this->rijndael->encrypt($data->package_id);
+            $packageUrl = "{$this->siteUrl()}/holidays/" . urlencode($title) . "/{$cipher}.html";
+            $likeUrl = sprintf("%s/holidays/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+            $likeClass = 'pk-like';
+            $likeImageClass = 'pk-img-like';
+            $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+            $pklikeAltText = 'Like';
+            $pklikeWords = 'Like';
+            if (isset($session->userlikedpackage[$data->package_id]) == "package-liked") {
+                $likeUrl = sprintf("%s/holidays/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                $likeClass = 'pk-unlike';
+                $likeImageClass = 'pk-img-unlike';
+                $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+                $pklikeAltText = 'Unlike';
+                $pklikeWords = 'Unlike';
+                $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                $likeAltText = 'Unlike';
+            }
+            ?>
+            <div class="listitems" id ="holiday-<?php echo $data->package_id ?>">
+                <div class="listitemsright">                    
+                    <div class="title">
+                        <h2><a href="<?php echo $packageUrl; ?>"><?php print $title ?></a></h2>
+        <?php if ($data->fixed_departure == 'Y'): ?>
+                            <span class ="fixed-departure" style="position: relative;">
+                                <input class="package-id" type="hidden" value="<?php echo $cipher ?>">
+            <?php print "<a href='javascript:void(0);' class='fixed-departure-dates'>Click for <b>Fixed Departure</b> Date</a>" ?>
+                                <div id ="fixed-departure-date-list-<?php echo $data->package_id ?>" class="fixed-dates-list" style="display:none;"></div>
+                            </span>
+        <?php endif; ?>
+
+                        <div class="clear"></div>
+                        <?php foreach ($this->offers as $offer): ?>
+            <?php if ($offer->package_id == $data->package_id): ?>
+                                <span class ="offer-type"> 
+                                    <b>Offer: </b><?php echo $offer->{'Value Type'} == 'VALUE' ? $offer->{'Offer Type'} . " ( $" . $offer->{'Value'} . " Discount )" : $offer->{'Offer Type'} . " ( " . $offer->{'Value'} . "% Discount )" ?>
+                                </span>
+                            <?php endif; ?>
+        <?php endforeach; ?>
+                    </div>
+                    <div class="desc word-limiter-text-trimmed">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($data->description), 450);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                            <a class="read-more" href="<?php print $packageUrl; ?>">more...</a>                        
+        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+        <?php print $data->description; ?><br />
+                        <a class="read-less" href="javascript:void(0);">...less</a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="listitemsleft">
+                    <?php
+                    $filename = $data->file_name;
+                    $thumbUrl = sprintf("%s/package/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($filename));
+                    $thumbPath = "package" . DS . 'thumbnails' . DS . '190x105' . DS . 'images' . DS . $filename;
+
+                    if (!is_file($this->basePath() . DS . $thumbPath)) {
+                        $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                    }
+                    ?>
+                    <div class="thmbimg">
+                        <a href="<?php echo $packageUrl; ?>">
+                            <img alt="" width="190" height="105" src="<?php echo $thumbUrl ?>" />
+                        </a>
+                    </div>
+
+                    <div class="list-price">Duration: <?php print $data->no_of_days ?> Days</div>
+                    <div class="list-price">Price: $<?php print number_format($data->total_cost, 2) ?> per couple</div>
+                    <div class="list-ratings">Rating:
+                        <span class='fivestar-ratings'>
+                            <?php
+                            echo $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $data->overall_rank, 'type' => 'package_rating', 'table' => '', 'id' => $data->package_id)));
+                            ?>
+                        </span>
+                    </div>
+                </div>
+                <div class="clear"></div>
+                <div class="likes-bar">
+                    <a class="link-button hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>" href="<?php print $likeUrl; ?>">
+                        <span class="like-phrase"><?php echo $pklikeWords ?></span>
+                        <img border="0" alt="<?php echo $pklikeAltText; ?>" src="<?php echo $this->theme($pkLikeBtn) ?>">                       
+                    </a>
+                </div>
+                <?php
+                $bookUrl = sprintf("%s/serviceprovider/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher);
+                $cip = $this->rijndael->encrypt('package-' . $data->package_id);
+                $bookUrl = sprintf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cip);
+                ?>
+                <div class="likes-bar"><a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a></div>
+                <div class="clear"></div>
+            </div>
+            <?php
+        endforeach;
+    else:
+        ?>
+        <div class="rec-holiday-title ">
+            <h2>Recommended Holidays</h2>
+        </div>
+        <?php
+        foreach ($this->datas['recommended'] as $data):
+            $title = trim($data['title']);
+            $cipher = $this->rijndael->encrypt($data['package_id']);
+            $packageUrl = "{$this->siteUrl()}/holidays/" . urlencode($title) . "/{$cipher}.html";
+
+            $likeUrl = sprintf("%s/holidays/%s/like/%s.html", $this->siteUrl(), $title, $cipher);
+            $likeClass = 'pk-like';
+            $likeImageClass = 'pk-img-like';
+            $likeBtn = 'themes/default/themeimages/ic-like.png';
+            $pkLikeBtn = "themes/default/themeimages/ic-like-light-grey.png";
+            $pklikeAltText = 'Like';
+            $pklikeWords = 'Like';
+            $likeAltText = 'Like';
+            if (isset($session->userlikedpackage[$data['package_id']]) && $session->userlikedpackage[$data['package_id']] == "package-liked") {
+                $likeUrl = sprintf("%s/holidays/%s/removelike/%s.html", $this->siteUrl(), $title, $cipher);
+                $likeClass = 'pk-unlike';
+                $likeBtn = 'themes/default/themeimages/ic-unlike.png';
+                $pkLikeBtn = "themes/default/themeimages/ic-unlike-light-grey.png";
+                $pklikeAltText = 'Unlike';
+                $pklikeWords = 'Unlike';
+                $likeImageClass = 'pk-img-unlike';
+            }
+            ?>
+    <div class="listitems" id ="holiday-<?php echo $data['package_id'] ?>">
+                <div class="listitemsright">                  
+                    <div class="title">
+                        <h2><a href="<?php echo $packageUrl; ?>"><?php print $title ?></a></h2>
+        <?php if ($data['fixed_departure'] == 'Y'): ?>
+                            <span class ="fixed-departure" style="position: relative;">
+                                <input class="package-id" type="hidden" value="<?php echo $cipher ?>">
+            <?php print "<a href='javascript:void(0);' class='fixed-departure-dates'>Click for <b>Fixed Departure</b> Date</a>" ?>
+                                <div id ="fixed-departure-date-list-<?php echo $data['package_id'] ?>" class="fixed-dates-list" style="display:none;"></div>
+                            </span>
+                        <?php endif; ?>
+                        <div class="clear"></div>
+                        <?php foreach ($this->offers as $offer): ?>
+            <?php if ($offer->package_id == $data['package_id']): ?>
+                                <span class ="offer-type"> 
+                                    <b>Offer: </b><?php echo $offer->{'Value Type'} == 'VALUE' ? $offer->{'Offer Type'} . " ( $" . $offer->{'Value'} . " Discount )" : $offer->{'Offer Type'} . " ( " . $offer->{'Value'} . "% Discount )" ?>
+                                </span>
+                            <?php endif; ?>
+        <?php endforeach; ?>
+                    </div>
+                    <div class="desc word-limiter-text-trimmed">
+                        <?php
+                        $outputText = $this->wordLimiter(strip_tags($data['description']), 450);
+                        print $outputText['text'];
+                        ?><br />
+                        <?php if ($outputText['isTrimmed']) : ?>
+                            <a class="read-more" href="<?php echo $packageUrl; ?>">more...</a>                        
+        <?php endif; ?>
+                    </div>
+                    <div class="desc word-limiter-text-all" style="display:none;">
+        <?php print $data['description']; ?><br />
+                        <a class="read-less" href="javascript:void(0);" />...less</a>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="listitemsleft">
+                    <?php
+                    $filename = $data['file_name'];
+                    $thumbUrl = sprintf("%s/package/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($filename));
+                    $thumbPath = "package" . DS . 'thumbnails' . DS . '190x105' . DS . 'images' . DS . $filename;
+
+                    if (!is_file($this->basePath() . DS . $thumbPath)) {
+                        $thumbUrl = sprintf("%s/images/no-image/190x105.jpg", $this->baseUrl());
+                    }
+                    ?>
+                    <div class="thmbimg">
+                        <a href="<?php echo $packageUrl; ?>">
+                            <img alt="" width="190" height="105" src="<?php echo $thumbUrl ?>" />
+                        </a>
+                    </div>
+                    <div class="list-price">Duration: <?php print $data['no_of_days'] ?> Days</div>
+                    <div class="list-price">Price: $<?php print number_format($data['total_cost'], 2) ?> per couple</div>
+                    <div class="list-ratings">Rating:
+                        <span class='fivestar-ratings'>
+                            <?php
+                            echo $this->partial('fivestar/fivestar.phtml', array('result' => array('value' => $data['overall_rank'], 'type' => 'package_rating', 'table' => '', 'id' => $data['package_id'])));
+                            ?>
+                        </span>
+                    </div>                    
+                </div>
+                <div class="clear"></div>
+                <div class="likes-bar">                   
+                    <a class="link-button hover-icon <?php echo $likeClass . ' ' . $likeImageClass; ?>" href="<?php print $likeUrl; ?>">
+                        <span class="like-phrase"><?php echo $pklikeWords ?></span>
+                        <img border="0" alt="<?php echo $pklikeAltText; ?>" src="<?php echo $this->theme($pkLikeBtn) ?>">                         
+                    </a>
+                </div>
+                <?php
+                $bookUrl = sprintf("%s/serviceprovider/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cipher);
+                $cip = $this->rijndael->encrypt('package-' . $data['package_id']);
+                $bookUrl = sprintf("%s/holidays/book/%s/%s.html", $this->siteUrl(), urlencode($title), $cip);
+                ?>
+                <div class="likes-bar"><a href="<?php print $bookUrl; ?>" class="link-button">&nbsp;Book </a></div>
+                <?php /*
+                  <div class="likes-bar"><a href="<?php echo $this->siteUrl() ?>/serviceprovider/book/package_id/<?php echo $data['package_id']; ?>" class="link-button">&nbsp;Book </a></div>
+                 */ ?>
+                <div class="clear"></div>
+
+            </div>
+            <?php
+        endforeach;
+    endif;
+    ?>
+</div>
+<div class="blankseparator"></div>
+<input type="hidden" id="pagination-lazy" value="<?php echo $this->offset; ?>">
+<input type="hidden" id="pagination-offset" value="<?php echo $this->limit; ?>">
+<input type="hidden" id="total-count" value="<?php echo $totalResultCount; ?>">
+<div class="readmore <?php echo ($totalResultCount <= $this->limit) ? 'hidden' : '' ?>"><a href="#">more...</a></div>
+
+<script type="text/javascript">	
+    var clicks = 0;
+    var sorted = $('#sorted-by');
+    
+    $(function() {
+        //$('.readmore').width($('#listitemswrapper').width());
+        $('.close-fixed').live('click',function(e) {
+            $(this).parent().css('display','none');
+        });
+        
+        $('.fixed-departure-dates').live('click',function() {
+            var $this = $(this);
+            var pid = $this.parent().find('.package-id').val();
+            var list = $this.parent().find('.fixed-dates-list');
+            $.ajax({
+                url:'holidays/getdeparturedates/',
+                data: 'id='+pid,
+                success: function(res){
+                    list.html(res);
+                    //list.css('display','block');
+                    $(list).toggle();
+                }
+            });
+        });
+        
+        $('.sort-item').click(function() {
+            var sortClass = $('#sorted-by').is('.DESC') ? 'DESC' : 'ASC';
+            var field = this.id;
+            var sortText = $(this).find('.menu-text').text();
+            if ($('#sorted-by').hasClass(field)) {
+                if (! $('#sorted-by').hasClass('DESC') && ! $('#sorted-by').hasClass('ASC')) {
+                    sortClass = 'ASC';
+                }
+                else if($('#sorted-by').is('.DESC')) {
+                    sortClass = 'ASC';
+                }
+                else {
+                    sortClass = 'DESC';
+                }
+                $('.listsort').removeClass('sort-asc sort-desc').addClass('sort-' + sortClass.toLowerCase());
+            }
+            sorted.text(sortText).attr('class', field + ' ' + sortClass);
+            getSortedData(field, sortClass);
+            
+        });
+        
+        $('.readmore').click(function(e){
+            e.preventDefault();
+            clicks = clicks + 1;
+            var $this = $(this);
+            var field='';
+            var operation='';
+            var pages = $('#pagination-lazy');
+            if(sorted.text().length > 1){
+                var sortDetail = sorted.attr('class').split(' ');
+                field = sortDetail[0];
+                operation = sortDetail[1]
+            }
+            var lsHcnt = $('#listitemswrapper').children('.listitems').size();
+            var h = $this.height();
+            $this
+            .height(h+'px')
+            .children('a')
+            .hide()
+            .end()
+            .children('img')
+            .remove();
+            $this.append('<img src="' + site.baseUrl + '/images/ajax-bar-loader.gif" />');
+            $.ajax({
+                url:'holidays/sorted-detail/',
+                data: 'offset='+pages.val()+'&field='+field+'&operation='+ operation,
+                success: function(res){
+                    if ($.trim(res)) {
+                        $('#listitemswrapper').append(res);
+                        $('#listitemswrapper').find('.listitems:gt(' + (lsHcnt-1) + ')').find('input.rating-star').dynamicRating().removeClass('hidden');
+                    }
+                    if( Number($('#total-count').val()) === $('.listitems').length){
+                        $this.addClass('hidden');
+                        return false;
+                    }
+                    pages.val( Number(pages.val()) + Number($('#pagination-offset').val()));
+                    $this.children('img').remove().end().children('a').show();
+                }
+            });
+        });
+    });
+    
+    function getSortedData(field , operation){
+        $.ajax({
+            url:'holidays/sorted-detail/',
+            data: 'field='+field+'&operation='+operation+'&sort=1'+'&offset='+$('#pagination-lazy').val(),
+            success: function(res){
+                $('#listitemswrapper').html(res);
+            }
+        });
+    }
+</script>
+<?php $this->headScript()->appendFile('/js/utility.js'); ?>

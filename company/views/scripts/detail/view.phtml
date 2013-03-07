@@ -1,0 +1,32 @@
+<?php
+$details = array();
+foreach ($this->companyDetails as $feature) {
+    $details[$feature->company_feature_id] = $feature->feature_desc;
+}
+if (null != $this->features) {
+?>
+
+<h2>Feature Details of <?php echo $this->company_name ?> | <a href="/company/detail/add/id/<?php echo $this->id; ?>"> Modify</a></h2>
+
+<?php
+    foreach ($this->features as $feature) {
+        if (isset($details[$feature['company_feature_id']])) {
+            ?>
+            <div id="content-heading">
+                <div class="field-label">
+                    <label><?php print $feature['name']; ?></label>
+                </div>
+                <div class="field-data">
+            <?php echo $description = ('yes' != $details[$feature['company_feature_id']]) ? $details[$feature['company_feature_id']] : ''; ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <?php
+        }
+    }
+}
+else
+{
+    echo "<h3>There are no features available for this category. <a href=\"/company/feature/add\">Add features</a></h3>";
+}
+?>

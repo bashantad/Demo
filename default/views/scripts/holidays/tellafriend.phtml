@@ -1,0 +1,92 @@
+<?php
+echo $this->headLink()->appendStylesheet(sprintf("%s/themes/default/themes/default/css/themes-core-colors-backgrounds.css", $this->baseUrl()));
+echo $this->headLink()->appendStylesheet(sprintf("%s/themes/default/styles/layout.css", $this->baseUrl()));
+?>
+<fieldset>
+    <legend>Tell A Friend</legend>
+    <div class="element">
+        <form id="formid" method="post" action="">  
+            <?php if (!$this->user) { ?>
+                <div class="form-item">
+                    <div class="Label">
+                        <label for="sender_name">Sender's Name:</label>                                
+                        <input type="text" class ="form-text" id="sender_name" name="sender_name" value="<?php echo $this->post['sender_name'] ?>">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <div class="Label">
+                        <label for="sender_email">Sender's Email:</label>                
+                        <input type="text" class ="form-text" id="sender_email" name="sender_email" value ="<?php echo $this->post['sender_email'] ?>">
+                        <?php
+                        if (isset($this->errors['sender_email'])) {
+                            print $this->errors['sender_email'];
+                        }
+                        ?>
+                    </div>
+                </div>
+            <?php } ?>
+            <div class="form-item"> 
+                <div class="Label">
+                    <label for="email">Friend's Email:</label>             
+                    <input type="text" class ="form-text <?php isset($this->errors['email']) ? print 'required'  : ''; ?>" id="email" name="email" value="<?php echo $this->post['email'] ?>"/>
+                    <?php
+                    if (isset($this->errors['email'])) {
+                        print $this->errors['email'];
+                    }
+                    ?>
+                </div>
+                <input type="hidden" id="site_url" name="site_url" <?php echo $this->post['site_url'] ?>/>
+            </div>
+            <div class="form-item">
+                <div class="Label">
+                    <label for="msg">Special Message:</label>           
+                    <textarea class ="form-text" id="msg" rows="3" cols="35" name="msg"><?php echo $this->post['msg'] ?></textarea>
+                </div>
+            </div>
+            <div class="form-item">
+                <div class="clear"></div>        
+                <input id="signin_submit" type="submit" name="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+</fieldset>
+<style type ="text/css">
+    body{
+        font-family: Arial,"Trebuchet MS",sans-serif,Helvetica;
+        font-size: 1em;        
+    }
+    .element-label{
+        float: left;  
+    }
+    .form-item{
+        border-bottom:1px dashed #ccc; 
+        min-height:30px; 
+        padding:6px 0;         
+    }
+    .Label{        
+        width:200px;
+    }
+    .txtbx{
+        color:#393939;
+        border:1px solid #999;
+    }
+
+    #signin_submit{
+        background:#00963f;
+        color:#fff!important;
+        text-shadow:0 -1px 0 #39d;
+        padding:3px 10px 3px 10px;
+        font-size:11px;
+        margin:0 5px 0 0;
+    }
+
+    #signin_submit::-moz-focus-inner {
+        padding:0;
+        border:0;
+    }
+    #signin_submit:hover, #signin_submit:focus {
+        background-position:0 -5px;
+        cursor:pointer;
+    }
+    .clear{clear:both;}	
+</style>

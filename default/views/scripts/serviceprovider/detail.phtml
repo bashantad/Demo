@@ -1,0 +1,135 @@
+<style>
+    .booknow{
+        float:right;
+    } 
+    .img-field{
+        float:left;
+        padding-left:4px;
+    }
+    .description-element-detail{
+        float:right;
+        width:17.812em;
+    }
+    .book-element{
+        margin:4px;
+        padding:4px;
+    }
+</style>   
+<div id="leftmaincol">
+    <div class="company-feature-detail">
+        <?php
+        $dtl = $this->elementDetail;
+        $elementDtlId = $dtl->element_dtl_id;
+        $arr = explode("/", $dtl->image_url);
+        $imageName = $arr[sizeof($arr) - 1];
+        $image = "/uploads/images/Element/thumbnails/images/700x400/" . $imageName;
+        ?>
+        <div class="img-field">
+            <img width="400"src="<?php echo $image; ?>" />
+        </div>
+        <div class="description-element-detail">
+            <h2><?php echo $dtl->name . " at " . ucwords($dtl->company); ?></h2>
+            <span class="holiday-caption-title"><?php echo ucwords($dtl->servicename); ?> : </span>
+            <span class="holiday-caption-desc"> <?php echo ucwords($dtl->serviceclass); ?></span><br />
+            <span class="holiday-caption-title">Price : </span>
+            <span class="holiday-caption-desc">$<?php echo ucwords($dtl->price); ?></span><br />
+            <span class="holiday-caption-title">Location : </span>
+            <span class="holiday-caption-desc"> <?php echo ucwords($dtl->Location); ?></span><br />
+            <span class="holiday-caption-title">Detail : </span>
+            <span class="holiday-caption-desc"> <?php echo ucwords($dtl->description); ?></span><br />
+            <div class="book-element">
+                <?php $cip = $this->rijndael->encrypt('element-'.$dtl->element_dtl_id); ?>
+               <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/'.$cip.'.html'; ?>" >Book</a>
+            </div>
+
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div class="element-detail-feature">
+        <?php
+        if (null != $this->companyDetails) {
+            $details = array();
+            foreach ($this->companyDetails as $feature) {
+                $details[$feature['company_feature_id']] = $feature['feature_desc'];
+            }
+            ?>
+            <h3>Feature Details of <?php echo $this->company_name ?></h3>
+            <?php
+            foreach ($this->features as $feature) {
+                if (isset($details[$feature['company_feature_id']])) {
+                    ?> 
+                    <div id="content-heading">
+                        <div class="field-label">
+                            <span class="holiday-caption-desc"><?php echo ucfirst(str_replace('-', '&nbsp;&nbsp;', $feature['name'])); ?></span><br />
+                        </div>
+                        <div class="field-data">
+                            <?php echo $description = ('yes' != $details[$feature['company_feature_id']]) ? stripslashes($details[$feature['company_feature_id']]) : ''; ?>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <?php
+                }
+            }
+        }
+        ?>
+    </div>
+    <div class="clear"></div>
+</div>
+<div id="rightpanel">
+    <div class="rightcontentbox">
+        <h2>Suggested Services</h2>
+        <?php
+        if ($this->relatedServices) {
+            foreach ($this->relatedServices as $dtl) {
+                if($dtl->element_dtl_id==$elementDtlId){
+                    continue;
+                }
+                $title = trim($dtl->name);
+                $params = sprintf("company_id=%s&element_dtl_id=%s", $dtl->company_id, $dtl->element_dtl_id);
+                $cipherQuery = $this->rijndael->encrypt($params);
+                $packageDetailUrl = $this->siteUrl() . "/serviceprovider/detail/?q=$cipherQuery";
+                ?>
+                <div class="otherhotelslistwrapper">
+                    <div class="list-duration"></div>
+                    <div class="otherhotelsthumb">
+                        <?php
+                        $arr = explode("/", $dtl->image_url);
+                        $imageName = $arr[sizeof($arr) - 1];
+                        $thumbNail = "/uploads/images/Element/thumbnails/images/70x70/" . $imageName;
+                        if (!file_exists($this->basePath() . $thumbNail)) {
+                            $thumbNail = sprintf("/images/no-image/70x70.jpg");
+                        }
+                        ?>
+                        <a href="<?php echo $packageDetailUrl; ?>">
+                            <img src ="<?php echo $this->baseUrl() . $thumbNail; ?>" alt ="no-img"/></a>
+                    </div>
+                    <div class="otherhotelsdesc">
+                        <?php
+                        echo $dtl->name;
+                        echo ('' != $dtl->company) ? " at " . ucwords($dtl->company) : '';
+                        ?><br />
+                        <?php if($dtl->servicename){ ?>
+                        <span class="holiday-caption-title"><?php echo ucwords($dtl->servicename); ?> : </span>
+                        <span class="holiday-caption-desc"> <?php echo ucwords($dtl->serviceclass); ?></span><br />
+                        <?php } ?>
+                        <span class="holiday-caption-title">Price : </span>
+                        <span class="holiday-caption-desc">$<?php echo ucwords($dtl->price); ?></span><br />
+                        <span class="holiday-caption-title">Location : </span>
+                        <span class="holiday-caption-desc"> <?php echo ucwords($dtl->Location); ?></span><br />
+                        <span class="holiday-caption-title">Detail : </span>
+                        <span class="holiday-caption-desc"> <?php echo ucwords($dtl->description); ?></span><br />
+                        <div class="booknow">
+                            <?php $cip = $this->rijndael->encrypt('element-'.$dtl->element_dtl_id); ?>
+                        <a class="back-button" href="<?php echo $this->siteUrl().'/serviceprovider/book/'.$cip.'.html'; ?>" >Book Now</a>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <?php
+            }
+        }
+        ?>  
+    </div>
+</div>
+<div class="clear"></div>
+<div class="eightpxseparator"></div>

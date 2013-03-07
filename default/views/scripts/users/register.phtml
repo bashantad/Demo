@@ -1,0 +1,33 @@
+<?php $this->headTitle('Registration'); ?>
+<div class="register-form">
+    <div class="alert">
+        <?php echo $this->partial("_flashMessages.phtml"); ?>
+    </div>
+    <fieldset>
+        <legend><h1>Create Account</h1></legend>
+        <div class="element">
+            <form action="<?php echo $this->url(); ?>" method="post">
+                <?php 
+                $form = $this->form->getElements(); 
+                foreach($this->form->getElements() as $element) {
+                    if ('register' == $element->getName()) {
+                        printf("<div class=\"form-item\"><label>&nbsp;</label>%s</div>", $element);
+                    }
+                    else {
+                        print $element;
+                    }
+                }
+                
+                ?>
+                <div class="form-item">
+                    <label>&nbsp;</label>
+                        <h2>Already have an account? <a href="<?php echo $this->baseUrl(); ?>/users/login">Sign in</a></h2>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+</div>  
+<?php echo $this->headScript()->appendFile($this->baseUrl() . "/js/default/check-email.js"); ?>
+
+
+

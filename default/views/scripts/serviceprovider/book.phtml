@@ -1,0 +1,223 @@
+<?php $this->headLink()->appendStylesheet($this->baseUrl().'/css/booking.css');
+$form = $this->bookingForm->getElements();
+?>
+<script type="text/javascript" src="<?php printf("%s/js/utility.js", $this->baseUrl()); ?>"></script>
+<div id="customize-package">
+    <form id="form-booking-first" action="" method="post" >
+        <div id="package-configuration-wrapper">
+            <div id="package-configuration-leftpanel">
+                <?php
+                if (isset($this->elementDetail)) {
+                    $dtl = $this->elementDetail;
+                    $arr = explode("/", $dtl->image_url);
+                    $imageName = $arr[sizeof($arr) - 1];                  
+                    ?>
+                    <div class="description-element-detail">
+                        <h2><?php echo $dtl->name . " at " . ucwords($dtl->company); ?></h2>
+                        <?php if (is_file($this->basePath() . DS . 'uploads' . DS . 'element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $imageName)) : ?>
+                        <div class="img-field">
+                            <img src="<?php printf("%s/uploads/element/thumbnails/120x120/images/%s", $this->baseUrl(), rawurlencode($imageName)); ?>" />
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if($dtl->servicename) : ?>
+                        <div class="inforow"><strong><?php echo ucwords($dtl->servicename); ?> </strong>: 
+                        <?php echo ucwords($dtl->serviceclass); ?></div>
+                        <?php endif; ?>
+                        <div class="inforow"><strong>Price</strong> :
+          					$<?php echo ucwords($dtl->price); ?></div>
+                        <div class="inforow"><strong>Location </strong>:
+                         <?php echo ucwords($dtl->Location); ?></div>
+                        <div class="infodetail"><strong>Detail</strong> : 
+                         <?php echo ucwords($dtl->description); ?></div>
+                        <span class="book-element">
+                            <input type="hidden" name="element_dtl_id" value="<?php echo $dtl->element_dtl_id; ?>" />
+                        </span>
+                    </div>
+                    <div class="clear"></div>
+                <?php } elseif ($this->package) { ?>
+                    <?php if (isset($this->package->event_id)) { ?>
+                        <input type="hidden" name="event_id" value="<?php echo $this->package->event_id; ?>" />
+                    <?php } else { ?>
+                        <input type="hidden" name="package_id" value="<?php echo $this->package->package_id; ?>" />
+                    <?php } ?>
+                    <h2>Your Selected Trip</h2>
+                    <div><h3><?php echo $this->package->title; ?></h3>
+                        <?php
+                        if (isset($this->package->file_name)) {
+                            $filename = $this->package->file_name;
+                            $thumbpath = 'package' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . $filename; 
+                            if (is_file($this->basePath() . DS . $thumbpath)) {
+                                printf("<div class='img-thumbnail'><img src='%s/package/thumbnails/120x120/images/%s' /></div>", $this->baseUrl(), rawurlencode($filename));
+                            }
+                        }
+                        ?>
+                        
+                        <div class="desc word-limiter-text-trimmed" style="font-size:12px;">
+                            <?php
+                            $outputText = $this->wordLimiter(strip_tags($this->package->description), 450);
+                            print $outputText['text'];
+                            ?><br />
+                            <?php if ($outputText['isTrimmed']) : ?>
+                                <a class="read-more" href="<?php echo $_SERVER['REQUEST_URI']; ?>">more...</a>                        
+                            <?php endif; ?>
+                        </div>
+                        <div class="desc word-limiter-text-all" style="display:none; font-size:12px;">
+                            <?php print $this->package->description; ?><br />
+                            <a class="read-less" href="javascript:void(0);">...less</a>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="eightpxseparator"></div>
+                    <div class="configuration-packagefacts">
+                        <div class="inforow"><strong>Duration:</strong>  
+                          <?php
+                            if (isset($this->package->no_of_days)) {
+                                print $this->package->no_of_days ." days";
+                            } else {
+                                echo (strtotime($this->package->end_dt) - strtotime($this->package->start_dt)) / (60 * 60 * 24) . " days";
+                            }
+                            ?>
+                        </div>
+                      <div class="inforow"><strong>Grade:</strong> Easy</div>
+                        <div class="inforow"><strong>Price:</strong> 
+                            <span id="customize-cost-value">
+                                <?php
+                                if (!isset($this->package->total_price)) {
+                                    echo "$".number_format($this->package->total_cost);
+                                } else {
+                                    echo "$".number_format($this->package->total_price);
+                                }
+                                ?></span></div>
+                        <div class="inforow"><span class="txtsmall">Including Taxes</span></div>
+                    </div>
+                    <div class="eightpxseparator"></div>
+                <?php } ?>
+            </div>
+            <div id="package-configuration-main">
+                <img src="<?php echo $this->baseUrl().'/images/step1-active.gif'; ?>" />
+                <div class="note-wrapper">
+                    <span class="note">
+                        <span>Note : </span>
+                    Your booking does not include any confirmation on your air connections to and from Nepal. If you, however, require us to make the international air connections for you, please contact our help desk through email or telephone.
+                    </span>
+                 </div>
+                <fieldset>
+                    <legend><div><h2>Book Your Trip</h2></div></legend>
+                    <fieldset><legend>Booking Date</legend>
+                        <div class="eightpxseparator"></div>
+                        <div class="fromdatepicker">
+                            <input type="hidden" name="request_uri" value="<?php echo $_SERVER['REQUEST_URI']; ?>" />
+                            <div class="fromdate">Date</div>
+                            <div class="datepickertxtbx">
+                                 <?php if($this->fixDates){ ?>
+                                <select id="fromdate" name="booking_dt" type="select">
+                                    <?php foreach($this->fixDates as $date){
+                                        $displayDate = new DateTime($date->date);
+                                        ?>
+                                    <option value="<?php echo $date->date; ?>"><?php echo $displayDate->format("d M Y"); ?></option>
+                                    <?php } ?>
+                                </select>    
+                                <?php }else{ 
+                                 echo "<div class='booking-date-wrapper'>".$form["booking_dt"]."</div>"; 
+                                    } ?>
+                            </div>
+                            
+                        </div>
+                    </fieldset>	
+                    <div class="eightpxseparator clear"></div>
+                    <div class="eightpxseparator"></div>
+                    <fieldset><legend>Number of People</legend>
+                        <div>
+                            <div id="adult-wrapper">
+                                <?php echo $form["no_of_adult"]; ?>
+                            </div>
+                            <div id="children-wrapper">
+                                <?php echo $form["no_of_children"]; ?><br />
+                                <small>(age less than 5 years)</small>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                    </fieldset>
+                    <?php if(!Zend_Auth::getInstance()->hasIdentity()){ ?>
+                    <div class="eightpxseparator clear"></div>
+                    <div class="eightpxseparator"></div>
+                    <fieldset><legend>Your Information</legend>
+                        <div>
+                            <?php $personalInfo =  $this->registerForm->getElements(); ?>
+                                <div id="email-wrapper">
+                                    <div class="frm-email">Email</div>
+                                    <div class="error-wrapper">
+                                        <?php echo $personalInfo["email"]; ?>
+                                        <div class="clear"></div>
+                                        <span class="info-email">&nbsp;</span>
+                                    </div>
+                                </div>
+                                <div id="password-wrapper">
+                                    <div class="frm-password">Password</div>
+                                    <div class="error-wrapper">                                    
+                                        <?php echo $personalInfo["password"]; ?>
+                                         <div class="clear"></div>
+                                    </div>
+                                </div>
+                                <div class="clear"></div>
+                                <div id="captcha-wrapper">
+                                        <?php echo $personalInfo['captcha']; ?>
+                                </div>
+                                <?php print $this->partial('_flashMessages.phtml'); ?>
+                                <div class="note-wrapper">
+                                    <span class="note"><span>Note : </span>If you have account at Nepaladvisor enter your email and password otherwise your email and password will be used for registration to Nepaladvisor.</span>
+                                </div>
+                        </div>
+                    </fieldset>
+                    <?php
+                    }
+                    ?>
+                    <div class="eightpxseparator"></div>
+                    <div class="eightpxseparator"></div>
+                    <div class="clear"></div>
+                    <div class="eightpxseparator"></div>
+                    <div id="book-wrapper">
+                    <?php if (!$this->isBooked): ?>
+                        <input class="book-submit"id="signin_submit" type="submit" name="submit" value="Next" />
+                    <?php endif; ?>
+                    </div>
+                    <div class="eightpxseparator"></div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </form>
+    <input id="cur-dt" type="hidden" name="cur_dt" value="<?php print $this->currentDate ?>" />
+    <?php //$this->headScript()->appendFile('/js/utility.js');
+     // echo $this->headScript()->appendFile('/js/booking-package.js');
+    ?>
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#fromdate").datepicker({
+            dateFormat: 'd M, yy',
+            beforeShowDay: NotBeforeToday,
+			
+			prevText: '', // Display text for previous month link
+			nextText: '' // Display text for next month link
+            
+        });
+        function NotBeforeToday(date)
+        {            
+            var now = new Date();
+            var curDate = $.trim($('#cur-dt').val());
+            if (curDate) {
+                now = new Date($('#cur-dt').val());//this gets the current date and time
+            }
+            if (date.getFullYear() == now.getFullYear() && date.getMonth() == now.getMonth() && date.getDate() > now.getDate())
+                return [true];
+            if (date.getFullYear() >= now.getFullYear() && date.getMonth() > now.getMonth())
+                return [true];
+            if (date.getFullYear() > now.getFullYear())
+                return [true];
+            return [false];
+        }
+        
+    });
+</script>

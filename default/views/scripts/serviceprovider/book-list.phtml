@@ -1,0 +1,122 @@
+<div id="maincontentwrapper">
+    <div id="maincontent" class="main-right-separator">
+        <div id="leftmaincol">
+            <h1><?php echo $this->results['heading']; ?></h1>
+            <div id="hotel-booking-wrapper">
+                <div id="hotel-content-wrapper" class="hotel-booking-desc">
+                    <?php
+                    $thumb = 'uploads' . DS . 'thumbnails' . DS . 'images' . DS . $this->results['file_name'];
+                    $thumbUrl = "";
+                    if (!is_file($this->basePath() . DIRECTORY_SEPARATOR . $thumb)) {
+                        $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->siteUrl());
+                    } else {
+                        $thumbUrl = sprintf("%s/uploads/thumbnails/190x105/images/%s", $this->baseUrl(), rawurlencode($this->results['file_name']));
+                    }
+                    ?>
+
+                    <div class="hotel-image-holder ">
+                        <img src="<?php echo $thumbUrl ?>" alt="<?php echo $this->results['heading'] ?>" width="190" height="105" /> 
+                    </div>
+                    <?php echo $this->results['description']; ?>
+                </div>
+
+                <div class="clear"></div>
+                <div id="grid" >
+                    <?php if ($this->element): ?>
+                    <h2>Services</h2>
+
+                    <table width="100%" cellspacing="0" cellpaddiing="0">
+                        <tbody><tr>
+                                <th width="10%" class="th-sn">Sno.</th>
+                                <th width="55%" class="th-txndate">Service Name</th>
+                                <th width="10%" class="th-txnamt">Price</th>
+                                <th width="8%" class="th-txnstatus">Book</th>
+                            </tr>
+                            <?php
+                            
+                                $count = 1;
+                                foreach ($this->element as $val):
+
+                                    $fn = '';
+                                    if ($val->image_url) {
+                                        $fn = end(explode('/', $val->image_url));
+                                    }
+
+                                    $thumbPath = 'uploads' . DS . 'element' . DS . 'thumbnails' . DS . '120x120' . DS . 'images' . DS . rawurlencode($fn);
+                                    $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->baseUrl());
+                                    if (is_file($this->basePath() . DS . $thumbPath)) {
+                                        $thumbUrl = sprintf("%s/uploads/element/thumbnails/120x120/images/%s", $this->baseUrl(), $fn);
+                                    }
+                                    $cip = $this->rijndael->encrypt('element-' . $val->element_dtl_id);
+                                    ?>
+                                    <tr>
+                                        <td class="alt"><?php echo $count; ?></td>
+                                        <td class="alt"><img height="70" width="70" src="<?php echo $thumbUrl; ?>"/><br><?php echo $val->name; ?></td>
+                                        <td class="alt">$<?php echo $val->price; ?></td>
+                                        <td class="alt"><a href="<?php echo $this->siteUrl() . '/serviceprovider/book/' . $cip . '.html'; ?>" class="back-button">Book</a></td>
+                                    </tr>
+                                    <?php
+                                    $count++;
+                                endforeach;
+                                ?>
+                            
+                        </tbody>
+                    </table>
+                    <?php else: ?>
+                    <div class="note-wrapper">
+                         If you want to book this hotel, please contanct us at info@nepaladvisor.com with your detail requirements.</span>
+                    </div>
+                    
+                    <?php endif; ?>
+                                
+                </div>
+
+            </div>
+
+        </div>
+        <div id="rightpanel">
+
+            <div class="rightcontentbox" id="suggestedinspirations">
+                <h2>Similar Interests</h2>
+                <?php foreach ($this->hotels as $key => $value) {
+                    ?>
+                    <div class ="attractions">
+                        <?php
+                        $title = trim(urlencode($value->heading));
+                        $id = $value->content_id;
+                        $cipher = $this->rijndael->encrypt($id);
+                        ?>
+                        <h3><a href="<?php printf("%s/hotels/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>"><?php echo trim($value->heading) ?></a></h3>
+                        <?php
+                        $thumb = 'uploads' . DS . 'thumbnails' . DS . 'images' . DS . $value->file_name;
+                        $thumbUrl = "";
+                        if (!is_file($this->basePath() . DIRECTORY_SEPARATOR . $thumb)) {
+                            $thumbUrl = sprintf("%s/images/no-image/70x70.jpg", $this->siteUrl());
+                        } else {
+                            $thumbUrl = sprintf("%s/uploads/thumbnails/120x120/images/%s", $this->baseUrl(), rawurlencode($value->file_name));
+                        }
+                        ?>
+                        <div class ="attractions-img">
+                            <img height="70" width="70" src="<?php echo $thumbUrl ?>" alt="<?php echo $value->heading ?>" align="left" />
+                        </div>
+                        <div class ="attractions-content">
+                            <?php
+                            $outputText = $this->wordLimiter(strip_tags($value->three_line_desc), 100);
+                            print $outputText['text'];
+                            ?><br/>
+                            <?php if ($outputText['isTrimmed']) : ?>
+                                <a href="<?php printf("%s/hotels/%s/%s.html", $this->siteUrl(), $title, $cipher) ?>">more...</a>
+                            <?php endif; ?>
+                        </div>
+                        <div class ="clear"></div>
+                    </div>
+                    <hr />
+
+                <?php } ?>   
+                <a href="/hotels">more hotels...</a>	
+            </div>
+        </div>
+        <div class="clear eightpxseparator"></div>
+
+    </div>                    
+</div>
